@@ -47,7 +47,8 @@ public:
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
 
-  template <typename K, typename V> Json(const std::map<K, V> &value) {
+  template <typename K, typename V>
+  Json(const std::map<K, V> &value) {
 
     JsonObject obj;
     if constexpr (std::is_arithmetic<K>::value) {
@@ -81,7 +82,8 @@ public:
     this->value = obj;
   }
 
-  template <typename T> Json(const std::vector<T> &value) {
+  template <typename T>
+  Json(const std::vector<T> &value) {
 
     JsonArray arr;
     for (const auto &el : value) {
@@ -95,12 +97,17 @@ public:
   }
 
 public:
-  template <typename T> Json &operator=(const T &value) {
+  template <typename T>
+  Json &operator=(const T &value) {
     if constexpr (is_vector<T>::value) {
       this->value = ValueType(JsonArray{});
       for (const auto &el : value) {
         std::get<JsonArray>(this->value).push_back(Json(el));
       }
+    } else if constexpr (is_pair<T>::value) {
+      this->value = ValueType(JsonArray{});
+      std::get<JsonArray>(this->value).push_back(Json(value.first));
+      std::get<JsonArray>(this->value).push_back(Json(value.second));
     } else if constexpr (is_map<T>::value) {
       this->value = ValueType(JsonObject{});
       for (const auto &[key, val] : value) {

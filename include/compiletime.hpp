@@ -18,6 +18,16 @@
 namespace utils {
 
 template <typename T>
+struct is_pair {
+  static constexpr bool value = false;
+};
+
+template <typename T1, typename T2>
+struct is_pair<std::pair<T1, T2>> {
+  static constexpr bool value = true;
+};
+
+template <typename T>
 struct is_vector {
   static constexpr bool value = false;
 };

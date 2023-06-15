@@ -19,7 +19,7 @@ json["key4"] = true; // bool
 json["key5"] = nullptr; // nullptr
 ```
 
-The RHS can also be any nested combination of data composed of `vector`, `unordered_map`, and `map` containers, where the basic types are from the aforementioned types: `int, double, string, bool, nullptr`. The only other rule is if a `map` or `unordered_map` is used, the key must either be a string or an arithmetic type (e.g. int/double etc.). If the key is an arithmetic type, it is cast to a string.
+The RHS can also be any nested combination of data composed of `vector`, `pair`, `unordered_map`, and `map` containers, where the basic types are from the aforementioned types: `int, double, string, bool, nullptr`. `pair` is cast to a vector of 2 elements. The only other rule is if a `map` or `unordered_map` is used, the key must either be a string or an arithmetic type (e.g. int/double etc.). If the key is an arithmetic type, it is cast to a string.
 
 
 For example, you can do,
