@@ -47,6 +47,14 @@ public:
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
 
+  template <typename T1, typename T2>
+  Json(const std::pair<T1, T2> &p) {
+    JsonArray arr;
+    arr.push_back(Json(p.first));
+    arr.push_back(Json(p.second));
+    this->value = arr;
+  }
+
   template <typename K, typename V>
   Json(const std::map<K, V> &value) {
 
