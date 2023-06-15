@@ -18,7 +18,7 @@ namespace print {
 template <typename T>
 std::ostream &v(const std::vector<T> &vec, std::ostream &os = std::cout,
                 std::string prefix = "") {
-  for (T &x : vec) {
+  for (const auto &x : vec) {
     os << prefix << x << " ";
   }
 }
@@ -26,7 +26,7 @@ std::ostream &v(const std::vector<T> &vec, std::ostream &os = std::cout,
 template <typename T>
 std::ostream &vv(const std::vector<std::vector<T>> &mat,
                  std::ostream &os = std::cout, std::string prefix = "") {
-  for (T &x : mat) {
+  for (const auto &x : mat) {
     os << prefix << v(x) << std::endl;
   }
 }
@@ -35,7 +35,7 @@ template <typename T>
 std::ostream &vvv(const std::vector<std::vector<std::vector<T>>> &tensor,
                   std::ostream &os = std::cout, std::string prefix = "") {
 
-  for (T &x : tensor) {
+  for (const auto &x : tensor) {
     os << prefix << vv(x) << std::endl;
   }
 }
