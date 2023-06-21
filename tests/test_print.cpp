@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+#include "hash.hpp"
 #include "print.hpp"
 
 #include <sstream>
@@ -43,11 +44,34 @@ TEST_CASE("print") {
     CHECK(is_correct);
   }
 
+  SUBCASE("pair") {
+    std::pair<int, int> p{1, 2};
+    ss << p;
+
+    CHECK(ss.str() == "(1, 2)");
+  }
+
   SUBCASE("vector of map") {
     std::vector<std::map<int, int>> v_m{{{1, 1}}, {{2, 2}}};
     ss << v_m;
 
     CHECK(ss.str() == "[{1: 1}, {2: 2}]");
+  }
+
+  SUBCASE("unordered_map of pair to double") {
+    std::unordered_map<std::pair<int, int>, double,
+                       utils::symmetric_pair_hash<int, int>>
+        um_p_d;
+
+    um_p_d[{1, 2}] = 1.0;
+    um_p_d[{2, 1}] = 2.0;
+
+    ss << um_p_d;
+
+    bool is_correct = ss.str() == "{(1, 2): 1, (2, 1): 2}" ||
+                      ss.str() == "{(2, 1): 2, (1, 2): 1}";
+
+    CHECK(is_correct);
   }
 
   SUBCASE("queue") {
