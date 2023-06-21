@@ -22,24 +22,48 @@ namespace utils {
  */
 template <typename T>
 inline void hash_combine(std::size_t &seed, const T &v) {
-  seed ^= std::hash<T>(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+/** taken from python's frozenset:
+ * https://stackoverflow.com/questions/20832279/python-frozenset-hashing-algorithm-implementation
+ *
+ * I benchmarked this against sorting then using hash_combine and it was faster,
+ * with fewer collisions, for the case of inserting all the edges of a complete
+ * undirected graph.
+ */
+template <typename T>
+inline void symmetric_hash_combine(std::size_t &seed, const T &v) {
+  seed ^= (v ^ (v << 16) ^ 89869747UL) * 3644798167UL;
 }
 
 /**
- * @brief Hash function for std::pair
+ * @brief hash function for std::pair
  */
 template <typename T1, typename T2>
 struct pair_hash {
   std::size_t operator()(const std::pair<T1, T2> &p) const {
-    std::size_t seed = 0;
-    hash_combine(seed, p.first);
-    hash_combine(seed, p.second);
-    return seed;
+    std::size_t hash = std::hash<T1>{}(p.first);
+    hash_combine(hash, p.second);
+    return hash;
   }
 };
 
 /**
- * @brief Hash function for std::vector
+ * @brief Symmetric hash function for std::pair
+ */
+template <typename T1, typename T2>
+struct symmetric_pair_hash {
+
+  std::size_t operator()(const std::pair<T1, T2> &pair) const {
+    std::size_t hash = std::hash<T1>{}(pair.first);
+    symmetric_hash_combine(hash, pair.second);
+    return hash;
+  }
+};
+
+/**
+ * @brief hash function for std::vector
  */
 template <typename T>
 struct vector_hash {
@@ -53,18 +77,17 @@ struct vector_hash {
 };
 
 /**
- * @brief Permutation-invariant hash function for std::set
+ * @brief permutation-invariant hash function for std::set
  * types.
  */
 template <typename T>
 struct set_hash {
   std::size_t operator()(const std::set<T> &s) const {
-    std::size_t total = 0;
+    std::size_t seed = 0;
     for (const auto &elem : s) {
-      total += std::hash<T>(elem);
+      symmetric_hash_combine(seed, elem);
     }
-
-    return total;
+    return seed;
   }
 };
 
@@ -75,46 +98,41 @@ struct set_hash {
 template <typename T>
 struct unordered_set_hash {
   std::size_t operator()(const std::unordered_set<T> &s) const {
-    std::size_t total = 0;
+    std::size_t seed = 0;
     for (const auto &elem : s) {
-      total += std::hash<T>(elem);
+      symmetric_hash_combine(seed, elem);
     }
-
-    return total;
+    return seed;
   }
 };
 
 /**
  * @brief Permutation-invariant hash function for std::map
  */
-template <typename Key, typename T>
+template <typename Key, typename V>
 struct map_hash {
 
-  std::size_t operator()(const std::map<Key, T> &m) const {
-    std::size_t total = 0;
+  std::size_t operator()(const std::map<Key, V> &m) const {
+    std::size_t seed = 0;
     for (const auto &elem : m) {
-      total +=
-          hash_combine(std::hash<Key>(elem.first), std::hash<T>(elem.second));
+      symmetric_hash_combine(seed, symmetric_pair_hash<Key, V>{}(elem));
     }
-
-    return total;
+    return seed;
   }
 };
 
 /**
  * @brief Permutation-invariant hash function for std::unordered_map
  */
-template <typename Key, typename T>
+template <typename Key, typename V>
 struct unordered_map_hash {
 
-  std::size_t operator()(const std::unordered_map<Key, T> &m) const {
-    std::size_t total = 0;
+  std::size_t operator()(const std::unordered_map<Key, V> &m) const {
+    std::size_t seed = 0;
     for (const auto &elem : m) {
-      total +=
-          hash_combine(std::hash<Key>(elem.first), std::hash<T>(elem.second));
+      symmetric_hash_combine(seed, symmetric_pair_hash<Key, V>{}(elem));
     }
-
-    return total;
+    return seed;
   }
 };
 
