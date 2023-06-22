@@ -43,7 +43,8 @@ inline void symmetric_hash_combine(std::size_t &seed, const T &v) {
 template <typename T1, typename T2>
 struct pair_hash {
   std::size_t operator()(const std::pair<T1, T2> &p) const {
-    std::size_t hash = std::hash<T1>{}(p.first);
+    std::size_t hash = 0;
+    hash_combine(hash, p.first);
     hash_combine(hash, p.second);
     return hash;
   }
@@ -56,7 +57,8 @@ template <typename T1, typename T2>
 struct symmetric_pair_hash {
 
   std::size_t operator()(const std::pair<T1, T2> &pair) const {
-    std::size_t hash = std::hash<T1>{}(pair.first);
+    std::size_t hash = 0;
+    symmetric_hash_combine(hash, pair.first);
     symmetric_hash_combine(hash, pair.second);
     return hash;
   }
