@@ -28,7 +28,8 @@ TEST_CASE("test timing a function with return value") {
 
   auto timed_function = utils::time(wait_1us_and_increment);
 
-  auto [result, duration] = timed_function(1);
+  int x = 1;
+  auto [result, duration] = timed_function(x);
 
   CHECK(result.has_value());
   CHECK(result.value() == 2);

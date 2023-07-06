@@ -58,7 +58,9 @@ constexpr auto time(const F &func) {
           std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
               .count();
 
-      return std::make_pair(optional_result, duration_ns);
+      double duration_seconds = static_cast<double>(duration_ns) / 1e9;
+
+      return std::make_pair(optional_result, duration_seconds);
     } else {
       optional_result = func(std::forward<decltype(args)>(args)...);
 
@@ -68,7 +70,8 @@ constexpr auto time(const F &func) {
           std::chrono::duration_cast<std::chrono::nanoseconds>(end - start)
               .count();
 
-      return std::make_pair(optional_result, duration_ns);
+      double duration_seconds = static_cast<double>(duration_ns) / 1e9;
+      return std::make_pair(optional_result, duration_seconds);
     }
   };
 }
