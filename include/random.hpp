@@ -9,8 +9,8 @@
 
 #pragma once
 
+#include <iostream>
 #include <random>
-
 namespace utils {
 
 /**
@@ -26,21 +26,20 @@ inline double random_double(std::mt19937 &gen) {
 }
 
 /**
- * @brief Generates a random integer in the range [min, max) (i.e. min is
- * included, max is excluded). Uses rejection sampling to ensure a uniform
- * distribution.
+ * @brief Generates a random integer in the range [min, max] (i.e. min and max
+ * are both included). Uses rejection sampling to ensure a uniform distribution.
  */
 inline int random_int(std::mt19937 &gen, int min, int max) {
 
   int range_size = max - min + 1;
-  int max_value = gen.max() - gen.max() % range_size;
+  unsigned max_value = gen.max() - gen.max() % range_size;
 
-  int sampled_int;
+  unsigned sampled_int;
   do {
     sampled_int = gen();
   } while (sampled_int >= max_value);
 
-  return min + sampled_int % range_size;
+  return min + static_cast<int>(sampled_int % range_size);
 }
 
 /**
