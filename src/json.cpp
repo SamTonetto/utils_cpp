@@ -21,14 +21,28 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
         if constexpr (std::is_same_v<T, JsonNull>) {
           ss << "null";
         } else if constexpr (std::is_same_v<T, JsonBool>) {
-          ss << (arg ? "true" : "false");
-        } else if constexpr (std::is_same_v<T, JsonInt> ||
-                             std::is_same_v<T, JsonLong> ||
+          ss << std::boolalpha << arg;
+        } else if constexpr (std::is_same_v<T, JsonChar> ||
+                             std::is_same_v<T, JsonUChar> ||
+                             std::is_same_v<T, JsonShort> ||
+                             std::is_same_v<T, JsonUShort> ||
+                             std::is_same_v<T, JsonInt> ||
                              std::is_same_v<T, JsonUInt> ||
-                             std::is_same_v<T, JsonULong>) {
+                             std::is_same_v<T, JsonLong> ||
+                             std::is_same_v<T, JsonULong> ||
+                             std::is_same_v<T, JsonLongLong> ||
+                             std::is_same_v<T, JsonULongLong>) {
           ss << arg;
+        } else if constexpr (std::is_same_v<T, JsonFloat>) {
+          ss << std::setprecision(std::numeric_limits<JsonFloat>::max_digits10)
+             << arg;
         } else if constexpr (std::is_same_v<T, JsonDouble>) {
-          ss << std::setprecision(16) << arg;
+          ss << std::setprecision(std::numeric_limits<JsonDouble>::max_digits10)
+             << arg;
+        } else if constexpr (std::is_same_v<T, JsonLongDouble>) {
+          ss << std::setprecision(
+                    std::numeric_limits<JsonLongDouble>::max_digits10)
+             << arg;
         } else if constexpr (std::is_same_v<T, JsonString>) {
           ss << "\"" << arg << "\"";
         } else if constexpr (std::is_same_v<T, JsonArray>) {
@@ -70,12 +84,28 @@ std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
         if constexpr (std::is_same_v<T, JsonNull>) {
           ss << "null";
         } else if constexpr (std::is_same_v<T, JsonBool>) {
-
-          ss << (arg ? "true" : "false");
-        } else if constexpr (std::is_same_v<T, JsonInt>) {
+          ss << std::boolalpha << arg;
+        } else if constexpr (std::is_same_v<T, JsonChar> ||
+                             std::is_same_v<T, JsonUChar> ||
+                             std::is_same_v<T, JsonShort> ||
+                             std::is_same_v<T, JsonUShort> ||
+                             std::is_same_v<T, JsonInt> ||
+                             std::is_same_v<T, JsonUInt> ||
+                             std::is_same_v<T, JsonLong> ||
+                             std::is_same_v<T, JsonULong> ||
+                             std::is_same_v<T, JsonLongLong> ||
+                             std::is_same_v<T, JsonULongLong>) {
           ss << arg;
+        } else if constexpr (std::is_same_v<T, JsonFloat>) {
+          ss << std::setprecision(std::numeric_limits<JsonFloat>::max_digits10)
+             << arg;
         } else if constexpr (std::is_same_v<T, JsonDouble>) {
-          ss << std::setprecision(16) << arg;
+          ss << std::setprecision(std::numeric_limits<JsonDouble>::max_digits10)
+             << arg;
+        } else if constexpr (std::is_same_v<T, JsonLongDouble>) {
+          ss << std::setprecision(
+                    std::numeric_limits<JsonLongDouble>::max_digits10)
+             << arg;
         } else if constexpr (std::is_same_v<T, JsonString>) {
           ss << "\"" << arg << "\"";
         } else if constexpr (std::is_same_v<T, JsonArray>) {

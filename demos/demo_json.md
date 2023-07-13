@@ -57,6 +57,14 @@ Then to dump to string, you just do
 std::string json_string = json2.dump();
 ```
 
+Note that unlike ordinary C++ maps/unordered_maps, you can instantly created nested keys of arbitrary depth, without having to create them layer by layer, and it will just work:
+
+```
+Json nested;
+nested["a"]["b"]["c"] = 1;  // creates {"a": {"b": {"c": 1}}}
+```
+
+
 Or, a formatted string:
 ```
 int tab_size = 2;

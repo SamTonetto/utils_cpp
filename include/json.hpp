@@ -23,13 +23,27 @@
 namespace utils {
 
 class Json;
+
 using JsonNull = std::nullptr_t;
 using JsonBool = bool;
+
+// Standard integer types
+using JsonChar = signed char;
+using JsonUChar = unsigned char;
+using JsonShort = short int;
+using JsonUShort = unsigned short int;
 using JsonInt = int;
-using JsonLong = long;
 using JsonUInt = unsigned int;
-using JsonULong = unsigned long;
+using JsonLong = long int;
+using JsonULong = unsigned long int;
+using JsonLongLong = long long int;
+using JsonULongLong = unsigned long long int;
+
+// Standard floating point types
+using JsonFloat = float;
 using JsonDouble = double;
+using JsonLongDouble = long double;
+
 using JsonString = std::string;
 using JsonArray = std::vector<Json>;
 using JsonObject = std::map<JsonString, Json>;
@@ -43,13 +57,23 @@ class Json {
 public:
   Json() : value{JsonObject{}} {}
 
-  Json(JsonDouble value) : value{value} {}
-  Json(JsonBool value) : value{value} {}
   Json(JsonString value) : value{value} {}
+  Json(JsonBool value) : value{value} {}
+
+  Json(JsonChar value) : value{value} {}
+  Json(JsonUChar value) : value{value} {}
+  Json(JsonShort value) : value{value} {}
+  Json(JsonUShort value) : value{value} {}
   Json(JsonInt value) : value{value} {}
-  Json(JsonLong value) : value{value} {}
   Json(JsonUInt value) : value{value} {}
+  Json(JsonLong value) : value{value} {}
   Json(JsonULong value) : value{value} {}
+  Json(JsonLongLong value) : value{value} {}
+  Json(JsonULongLong value) : value{value} {}
+
+  Json(JsonFloat value) : value{value} {}
+  Json(JsonDouble value) : value{value} {}
+  Json(JsonLongDouble value) : value{value} {}
 
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
@@ -108,6 +132,10 @@ public:
   }
 
   Json &operator[](const JsonString &key) {
+
+    if (!std::get<JsonObject>(value).contains(key)) {
+      std::get<JsonObject>(value)[key] = Json();
+    }
     return std::get<JsonObject>(value)[key];
   }
 
@@ -141,8 +169,10 @@ public:
 
 private:
   using ValueType =
-      std::variant<JsonNull, JsonBool, JsonInt, JsonLong, JsonUInt, JsonULong,
-                   JsonDouble, JsonString, JsonArray, JsonObject>;
+      std::variant<JsonNull, JsonBool, JsonChar, JsonUChar, JsonShort,
+                   JsonUShort, JsonInt, JsonUInt, JsonLong, JsonULong,
+                   JsonLongLong, JsonULongLong, JsonFloat, JsonDouble,
+                   JsonLongDouble, JsonString, JsonArray, JsonObject>;
 
   ValueType value;
 
