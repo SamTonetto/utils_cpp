@@ -50,7 +50,7 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
           int index = 0;
           for (const auto &el : arg) {
             el.dump(ss);
-            if (index < arg.size() - 1) {
+            if (index < static_cast<int>(arg.size()) - 1) {
               ss << ',';
             }
             index++;
@@ -61,7 +61,7 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
           int index = 0;
           for (const auto &[key, value] : arg) {
             ss << "\"" << key << "\":" << value.dump();
-            if (index < arg.size() - 1) {
+            if (index < static_cast<int>(arg.size()) - 1) {
               ss << ',';
             }
             index++;
@@ -115,10 +115,10 @@ std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
             ss << std::string(current_offset + tab_size, ' ');
             el.pretty_dump(ss, tab_size, current_offset + tab_size);
 
-            if (index < arg.size() - 1) {
+            if (index < static_cast<int>(arg.size()) - 1) {
               ss << ',';
             }
-            if (index < arg.size()) {
+            if (index < static_cast<int>(arg.size())) {
               ss << '\n';
             }
             index++;
@@ -132,10 +132,10 @@ std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
                << "\": ";
 
             value.pretty_dump(ss, tab_size, current_offset + tab_size);
-            if (index < arg.size() - 1) {
+            if (index < static_cast<int>(arg.size()) - 1) {
               ss << ',';
             }
-            if (index < arg.size()) {
+            if (index < static_cast<int>(arg.size())) {
               ss << '\n';
             }
             index++;
