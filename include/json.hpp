@@ -26,6 +26,9 @@ class Json;
 using JsonNull = std::nullptr_t;
 using JsonBool = bool;
 using JsonInt = int;
+using JsonLong = long;
+using JsonUInt = unsigned int;
+using JsonULong = unsigned long;
 using JsonDouble = double;
 using JsonString = std::string;
 using JsonArray = std::vector<Json>;
@@ -39,10 +42,14 @@ class Json {
 
 public:
   Json() : value{JsonObject{}} {}
-  Json(JsonInt value) : value{value} {}
+
   Json(JsonDouble value) : value{value} {}
   Json(JsonBool value) : value{value} {}
   Json(JsonString value) : value{value} {}
+  Json(JsonInt value) : value{value} {}
+  Json(JsonLong value) : value{value} {}
+  Json(JsonUInt value) : value{value} {}
+  Json(JsonULong value) : value{value} {}
 
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
@@ -133,8 +140,9 @@ public:
   }
 
 private:
-  using ValueType = std::variant<JsonNull, JsonBool, JsonInt, JsonDouble,
-                                 JsonString, JsonArray, JsonObject>;
+  using ValueType =
+      std::variant<JsonNull, JsonBool, JsonInt, JsonLong, JsonUInt, JsonULong,
+                   JsonDouble, JsonString, JsonArray, JsonObject>;
 
   ValueType value;
 
