@@ -22,7 +22,10 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
           ss << "null";
         } else if constexpr (std::is_same_v<T, JsonBool>) {
           ss << (arg ? "true" : "false");
-        } else if constexpr (std::is_same_v<T, JsonInt>) {
+        } else if constexpr (std::is_same_v<T, JsonInt> ||
+                             std::is_same_v<T, JsonLong> ||
+                             std::is_same_v<T, JsonUInt> ||
+                             std::is_same_v<T, JsonULong>) {
           ss << arg;
         } else if constexpr (std::is_same_v<T, JsonDouble>) {
           ss << std::setprecision(16) << arg;
