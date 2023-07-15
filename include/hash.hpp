@@ -138,4 +138,18 @@ struct unordered_map_hash {
   }
 };
 
+/**
+ * @brief array hash
+ */
+template <typename T, size_t N>
+struct array_hash {
+  std::size_t operator()(const std::array<T, N> &a) const {
+    std::size_t seed = 0;
+    for (const auto &elem : a) {
+      hash_combine(seed, elem);
+    }
+    return seed;
+  }
+};
+
 } // namespace utils
