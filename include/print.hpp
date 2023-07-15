@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <array>
 #include <iostream>
 #include <map>
 #include <queue>
@@ -23,6 +24,9 @@
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const std::vector<T> &container);
+
+template <typename T, std::size_t N>
+std::ostream &operator<<(std::ostream &os, const std::array<T, N> &container);
 
 template <typename T1, typename T2>
 std::ostream &operator<<(std::ostream &os, const std::pair<T1, T2> &container);
@@ -64,6 +68,20 @@ operator<<(std::ostream &os,
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const std::vector<T> &container) {
 
+  os << '[';
+  int index = 0;
+  for (const auto &x : container) {
+    os << x;
+    if (index++ < container.size() - 1) {
+      os << ", ";
+    }
+  }
+  os << "]";
+  return os;
+}
+
+template <typename T, std::size_t N>
+std::ostream &operator<<(std::ostream &os, const std::array<T, N> &container) {
   os << '[';
   int index = 0;
   for (const auto &x : container) {

@@ -16,6 +16,13 @@ TEST_CASE("print") {
     CHECK(ss.str() == "[1, 2, 3, 4, 5]");
   }
 
+  SUBCASE("array") {
+    std::array<int, 5> v{1, 2, 3, 4, 5};
+
+    ss << v;
+    CHECK(ss.str() == "[1, 2, 3, 4, 5]");
+  }
+
   SUBCASE("set") {
     std::set<int> s{1, 2, 3, 4, 5};
     ss << s;
