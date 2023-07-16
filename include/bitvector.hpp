@@ -92,6 +92,12 @@ public:
     data_[index / N] |= 1ULL << (index % N);
   }
 
+  void reset() noexcept {
+    for (auto &i : data_) {
+      i = 0;
+    }
+  }
+
   void reset(std::size_t index) noexcept {
     data_[index / N] &= ~(1ULL << (index % N));
   }
