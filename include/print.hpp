@@ -20,6 +20,41 @@
 #include <unordered_set>
 #include <vector>
 
+#include "compiletime.hpp"
+
+// ========= IO manipulation ===========
+
+namespace utils {
+
+inline int newline_flag_index = std::ios_base::xalloc();
+
+// unfortunately xalloc iwords always default to zero, so we imagine that a 0
+// tab width actually corresponds to a default of 2.
+inline int tab_width_index = std::ios_base::xalloc();
+
+// Only used if os.iword(newline_flag_index) is true
+inline thread_local std::size_t indent_amount = 0;
+
+inline std::ostream &prettyprint(std::ostream &os) {
+  os.iword(newline_flag_index) = 1;
+  return os;
+}
+
+inline std::ostream &noprettyprint(std::ostream &os) {
+  os.iword(newline_flag_index) = 0;
+  return os;
+}
+
+// Set the with of one indentation level
+// Since the default width of 2 is represented as 0, we have to subtract 2 from
+// the user-inputted width.
+inline std::ostream &tabwidth(std::ostream &os, std::size_t width) {
+  os.iword(tab_width_index) = width - 2;
+  return os;
+}
+
+} // namespace utils
+
 // ========= Forward Declarations ===========
 
 template <typename T>
@@ -68,29 +103,118 @@ operator<<(std::ostream &os,
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const std::vector<T> &container) {
 
-  os << '[';
-  int index = 0;
-  for (const auto &x : container) {
-    os << x;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "[]";
+    return os;
   }
-  os << "]";
+
+  os << indent << '[';
+
+  std::size_t index = 0;
+  for (const auto &x : container) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << x;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << x;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << x;
+      } else {
+        os << ", " << x;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "]";
+    } else {
+      os << "]";
+    }
+  } else {
+    os << "]";
+  }
+
   return os;
 }
 
 template <typename T, std::size_t N>
 std::ostream &operator<<(std::ostream &os, const std::array<T, N> &container) {
-  os << '[';
-  int index = 0;
-  for (const auto &x : container) {
-    os << x;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "[]";
+    return os;
   }
-  os << "]";
+
+  os << indent << '[';
+
+  std::size_t index = 0;
+  for (const auto &x : container) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << x;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << x;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << x;
+      } else {
+        os << ", " << x;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "]";
+    } else {
+      os << "]";
+    }
+  } else {
+    os << "]";
+  }
+
   return os;
 }
 
@@ -104,15 +228,58 @@ template <typename T, typename Compare>
 std::ostream &operator<<(std::ostream &os,
                          const std::set<T, Compare> &container) {
 
-  os << '{';
-  int index = 0;
-  for (const auto &x : container) {
-    os << x;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "{}";
+    return os;
   }
-  os << "}";
+
+  os << indent << '{';
+  std::size_t index = 0;
+  for (const auto &x : container) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << x;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << x;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << x;
+      } else {
+        os << ", " << x;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "}";
+    } else {
+      os << "}";
+    }
+  } else {
+    os << "}";
+  }
+
   return os;
 }
 
@@ -121,15 +288,58 @@ std::ostream &
 operator<<(std::ostream &os,
            const std::unordered_set<T, Hash, KeyEqual> &container) {
 
-  os << '{';
-  int index = 0;
-  for (const auto &x : container) {
-    os << x;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "{}";
+    return os;
   }
-  os << "}";
+
+  os << indent << '{';
+  std::size_t index = 0;
+  for (const auto &x : container) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << x;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << x;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << x;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << x;
+      } else {
+        os << ", " << x;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "}";
+    } else {
+      os << "}";
+    }
+  } else {
+    os << "}";
+  }
+
   return os;
 }
 
@@ -137,15 +347,58 @@ template <typename K, typename V, typename Compare>
 std::ostream &operator<<(std::ostream &os,
                          const std::map<K, V, Compare> &container) {
 
-  os << "{";
-  int index = 0;
-  for (const auto &[key, value] : container) {
-    os << key << ": " << value;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "{}";
+    return os;
   }
-  os << "}";
+
+  os << indent << '{';
+  std::size_t index = 0;
+  for (const auto &[key, value] : container) {
+    if constexpr (!std::is_scalar_v<K> || !std::is_scalar_v<V>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << key << ": " << value;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << key << ": " << value;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << key << ": " << value;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << key << ": " << value;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << key << ": " << value;
+      } else {
+        os << ", " << key << ": " << value;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<K> || !std::is_scalar_v<V>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "}";
+    } else {
+      os << "}";
+    }
+  } else {
+    os << "}";
+  }
+
   return os;
 }
 
@@ -153,39 +406,181 @@ template <typename K, typename V, typename Hash, typename KeyEqual>
 std::ostream &
 operator<<(std::ostream &os,
            const std::unordered_map<K, V, Hash, KeyEqual> &container) {
-  os << "{";
-  int index = 0;
-  for (const auto &[key, value] : container) {
-    os << key << ": " << value;
-    if (index++ < container.size() - 1) {
-      os << ", ";
-    }
+
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "{}";
+    return os;
   }
-  os << "}";
+
+  os << indent << '{';
+  std::size_t index = 0;
+  for (const auto &[key, value] : container) {
+    if constexpr (!std::is_scalar_v<K> || !std::is_scalar_v<V>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << key << ": " << value;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << key << ": " << value;
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << key << ": " << value;
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << key << ": " << value;
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << key << ": " << value;
+      } else {
+        os << ", " << key << ": " << value;
+      }
+    }
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<K> || !std::is_scalar_v<V>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "}";
+    } else {
+      os << "}";
+    }
+  } else {
+    os << "}";
+  }
+
   return os;
 }
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const std::stack<T> &container) {
-  std::stack<T> temp = container;
-  std::vector<T> vec;
-  while (!temp.empty()) {
-    vec.push_back(temp.top());
-    temp.pop();
+
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "[]";
+    return os;
   }
-  os << vec;
+
+  os << indent << '[';
+  std::size_t index = 0;
+
+  std::stack<T> temp(container);
+  while (!temp.empty()) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.top();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << temp.top();
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.top();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << temp.top();
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << temp.top();
+      } else {
+        os << ", " << temp.top();
+      }
+    }
+    temp.pop();
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "]";
+    } else {
+      os << "]";
+    }
+  } else {
+    os << "]";
+  }
+
   return os;
 }
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const std::queue<T> &container) {
-  std::queue<T> temp = container;
-  std::vector<T> vec;
-  while (!temp.empty()) {
-    vec.push_back(temp.front());
-    temp.pop();
+
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "[]";
+    return os;
   }
-  os << vec;
+
+  os << indent << '[';
+  std::size_t index = 0;
+
+  std::queue<T> temp(container);
+  while (!temp.empty()) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.front();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << temp.front();
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.front();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << temp.front();
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << temp.front();
+      } else {
+        os << ", " << temp.front();
+      }
+    }
+    temp.pop();
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "]";
+    } else {
+      os << "]";
+    }
+  } else {
+    os << "]";
+  }
+
   return os;
 }
 
@@ -193,12 +588,62 @@ template <typename T, typename Container, typename Compare>
 std::ostream &
 operator<<(std::ostream &os,
            const std::priority_queue<T, Container, Compare> &container) {
-  std::priority_queue<T> temp = container;
-  std::vector<T> vec;
-  while (!temp.empty()) {
-    vec.push_back(temp.top());
-    temp.pop();
+
+  std::string indent = std::string(utils::indent_amount, ' ');
+
+  if (container.size() == 0) {
+    os << indent << "[]";
+    return os;
   }
-  os << vec;
+
+  os << indent << '[';
+  std::size_t index = 0;
+
+  std::priority_queue<T, Container, Compare> temp(container);
+
+  while (!temp.empty()) {
+    if constexpr (!std::is_scalar_v<T>) {
+
+      if (index == 0) {
+        if (os.iword(utils::newline_flag_index)) {
+          os << "\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.top();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << temp.top();
+        }
+      } else {
+        if (os.iword(utils::newline_flag_index)) {
+          os << ",\n";
+          utils::indent_amount += os.iword(utils::tab_width_index) + 2;
+          os << indent << temp.top();
+          utils::indent_amount -= os.iword(utils::tab_width_index) + 2;
+        } else {
+          os << ", " << temp.top();
+        }
+      }
+    } else {
+
+      if (index == 0) {
+        os << temp.top();
+      } else {
+        os << ", " << temp.top();
+      }
+    }
+    temp.pop();
+    ++index;
+  }
+
+  if constexpr (!std::is_scalar_v<T>) {
+    if (os.iword(utils::newline_flag_index)) {
+      os << "\n" << indent << "]";
+    } else {
+      os << "]";
+    }
+  } else {
+    os << "]";
+  }
+
   return os;
 }

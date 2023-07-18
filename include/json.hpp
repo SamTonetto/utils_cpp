@@ -142,21 +142,21 @@ public:
 public:
   template <typename T>
   Json &operator=(const T &value) {
-    if constexpr (is_vector<T>::value) {
+    if constexpr (is_same_container_v<std::vector, T>) {
       this->value = ValueType(JsonArray{});
       for (const auto &el : value) {
         std::get<JsonArray>(this->value).push_back(Json(el));
       }
-    } else if constexpr (is_pair<T>::value) {
+    } else if constexpr (is_same_container_v<std::pair, T>) {
       this->value = ValueType(JsonArray{});
       std::get<JsonArray>(this->value).push_back(Json(value.first));
       std::get<JsonArray>(this->value).push_back(Json(value.second));
-    } else if constexpr (is_map<T>::value) {
+    } else if constexpr (is_same_container_v<std::map, T>) {
       this->value = ValueType(JsonObject{});
       for (const auto &[key, val] : value) {
         std::get<JsonObject>(this->value)[key] = Json(val);
       }
-    } else if constexpr (is_unordered_map<T>::value) {
+    } else if constexpr (is_same_container_v<std::unordered_map, T>) {
       this->value = ValueType(JsonObject{});
       for (const auto &[key, val] : value) {
         std::get<JsonObject>(this->value)[key] = Json(val);

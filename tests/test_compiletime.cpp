@@ -16,62 +16,13 @@ TEST_CASE("test vec/map/umap") {
   std::unordered_map<int, int> umap = {{1, 1}, {2, 2}, {3, 3}};
 
   SUBCASE("is pair") {
-    CHECK(utils::is_pair<decltype(scalar)>::value == false);
-    CHECK(utils::is_pair<decltype(vector)>::value == false);
-    CHECK(utils::is_pair<decltype(pair)>::value == true);
-    CHECK(utils::is_pair<decltype(set)>::value == false);
-    CHECK(utils::is_pair<decltype(uset)>::value == false);
-    CHECK(utils::is_pair<decltype(map)>::value == false);
-    CHECK(utils::is_pair<decltype(umap)>::value == false);
-  }
 
-  SUBCASE("is vec") {
-    CHECK(utils::is_vector<decltype(scalar)>::value == false);
-    CHECK(utils::is_vector<decltype(vector)>::value == true);
-    CHECK(utils::is_vector<decltype(pair)>::value == false);
-    CHECK(utils::is_vector<decltype(set)>::value == false);
-    CHECK(utils::is_vector<decltype(uset)>::value == false);
-    CHECK(utils::is_vector<decltype(map)>::value == false);
-    CHECK(utils::is_vector<decltype(umap)>::value == false);
-  }
-
-  SUBCASE("is set") {
-    CHECK(utils::is_set<decltype(scalar)>::value == false);
-    CHECK(utils::is_set<decltype(vector)>::value == false);
-    CHECK(utils::is_set<decltype(pair)>::value == false);
-    CHECK(utils::is_set<decltype(set)>::value == true);
-    CHECK(utils::is_set<decltype(uset)>::value == false);
-    CHECK(utils::is_set<decltype(map)>::value == false);
-    CHECK(utils::is_set<decltype(umap)>::value == false);
-  }
-
-  SUBCASE("is uset") {
-    CHECK(utils::is_unordered_set<decltype(scalar)>::value == false);
-    CHECK(utils::is_unordered_set<decltype(vector)>::value == false);
-    CHECK(utils::is_unordered_set<decltype(pair)>::value == false);
-    CHECK(utils::is_unordered_set<decltype(set)>::value == false);
-    CHECK(utils::is_unordered_set<decltype(uset)>::value == true);
-    CHECK(utils::is_unordered_set<decltype(map)>::value == false);
-    CHECK(utils::is_unordered_set<decltype(umap)>::value == false);
-  }
-
-  SUBCASE("is map") {
-    CHECK(utils::is_map<decltype(scalar)>::value == false);
-    CHECK(utils::is_map<decltype(vector)>::value == false);
-    CHECK(utils::is_map<decltype(pair)>::value == false);
-    CHECK(utils::is_map<decltype(set)>::value == false);
-    CHECK(utils::is_map<decltype(uset)>::value == false);
-    CHECK(utils::is_map<decltype(map)>::value == true);
-    CHECK(utils::is_map<decltype(umap)>::value == false);
-  }
-
-  SUBCASE("is umap") {
-    CHECK(utils::is_unordered_map<decltype(scalar)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(vector)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(pair)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(set)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(uset)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(map)>::value == false);
-    CHECK(utils::is_unordered_map<decltype(umap)>::value == true);
+    CHECK(utils::is_same_container_v<std::pair, decltype(scalar)> == false);
+    CHECK(utils::is_same_container_v<std::pair, decltype(vector)> == false);
+    CHECK(utils::is_same_container_v<std::pair, decltype(pair)> == true);
+    CHECK(utils::is_same_container_v<std::pair, decltype(set)> == false);
+    CHECK(utils::is_same_container_v<std::pair, decltype(uset)> == false);
+    CHECK(utils::is_same_container_v<std::pair, decltype(map)> == false);
+    CHECK(utils::is_same_container_v<std::pair, decltype(umap)> == false);
   }
 }

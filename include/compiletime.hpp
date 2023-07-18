@@ -8,74 +8,73 @@
 
 #pragma once
 
+#include <bitset>
+#include <forward_list>
+#include <list>
 #include <map>
+#include <queue>
 #include <set>
+#include <span>
+#include <stack>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <valarray>
 #include <vector>
 
 namespace utils {
 
-template <typename T>
-struct is_pair {
-  static constexpr bool value = false;
-};
+template <template <typename...> typename Target, typename T>
+struct is_same_container : std::false_type {};
 
-template <typename T1, typename T2>
-struct is_pair<std::pair<T1, T2>> {
-  static constexpr bool value = true;
-};
+template <template <typename...> typename Target, typename... Args>
+struct is_same_container<Target, Target<Args...>> : std::true_type {};
 
-template <typename T>
-struct is_vector {
-  static constexpr bool value = false;
-};
-
-template <typename T, typename Allocator>
-struct is_vector<std::vector<T, Allocator>> {
-  static constexpr bool value = true;
-};
-
-template <typename T>
-struct is_set {
-  static constexpr bool value = false;
-};
-
-template <typename Key, typename Compare, typename Allocator>
-struct is_set<std::set<Key, Compare, Allocator>> {
-  static constexpr bool value = true;
-};
+/**
+ * is_same_container_v can be used to check if two containers are the same,
+ * without reference to what they contain.
+ * @example
+ * std::vector<int> v;
+ * std::unordered_map<int, std::string> m;
+ *
+ * static_assert(is_same_container_v<std::vector, decltype(v)>);
+ * static_assert(is_same_container_v<std::unordered_map, decltype(m)>);
+ *
+ */
+template <template <typename...> typename Target, typename T>
+inline constexpr bool is_same_container_v = is_same_container<Target, T>::value;
 
 template <typename T>
-struct is_unordered_set {
-  static constexpr bool value = false;
+struct is_stl_container {
+  static constexpr bool value =
+
+      is_same_container_v<std::span, T> || is_same_container_v<std::pair, T> ||
+      is_same_container_v<std::tuple, T> ||
+      is_same_container_v<std::vector, T> ||
+      is_same_container_v<std::array, T> ||
+      is_same_container_v<std::bitset, T> ||
+      is_same_container_v<std::valarray, T> ||
+      is_same_container_v<std::deque, T> || is_same_container_v<std::list, T> ||
+      is_same_container_v<std::forward_list, T> ||
+      is_same_container_v<std::set, T> ||
+      is_same_container_v<std::unordered_set, T> ||
+      is_same_container_v<std::map, T> ||
+      is_same_container_v<std::unordered_map, T> ||
+      is_same_container_v<std::multiset, T> ||
+      is_same_container_v<std::multimap, T> ||
+      is_same_container_v<std::unordered_multiset, T> ||
+      is_same_container_v<std::unordered_multimap, T> ||
+      is_same_container_v<std::stack, T> || is_same_container_v<std::queue, T>;
 };
 
-template <typename Key, typename Hash, typename KeyEqual, typename Allocator>
-struct is_unordered_set<std::unordered_set<Key, Hash, KeyEqual, Allocator>> {
-  static constexpr bool value = true;
-};
-
-template <typename T>
-struct is_map {
-  static constexpr bool value = false;
-};
-
-template <typename Key, typename T, typename Compare, typename Allocator>
-struct is_map<std::map<Key, T, Compare, Allocator>> {
-  static constexpr bool value = true;
-};
-
-template <typename T>
-struct is_unordered_map {
-  static constexpr bool value = false;
-};
-
-template <typename Key, typename T, typename Hash, typename KeyEqual,
-          typename Allocator>
-struct is_unordered_map<std::unordered_map<Key, T, Hash, KeyEqual, Allocator>> {
-  static constexpr bool value = true;
-};
+/**
+ * is_stl_container_v can be used to check if a type is an STL container.
+ * @example
+ * static_assert(is_stl_container_v<std::vector<int>>);
+ * static_assert(is_stl_container_v<std::unordered_map<int, std::string>>);
+ *
+ */
+template <class T>
+inline constexpr bool is_stl_container_v = is_stl_container<T>::value;
 
 } // namespace utils
