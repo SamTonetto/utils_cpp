@@ -17,12 +17,12 @@ Json parse_file(const std::string &filename) {
     throw std::runtime_error("Could not open file");
   }
 
-  std::string json_str((std::istreambuf_iterator<char>(infile)),
-                       std::istreambuf_iterator<char>());
+  std::stringstream buffer;
+  buffer << infile.rdbuf();
 
   infile.close();
 
-  return parse(json_str);
+  return parse(buffer.str());
 }
 
 std::string prettify(std::string_view json_str) {
