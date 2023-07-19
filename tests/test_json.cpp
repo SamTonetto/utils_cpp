@@ -66,3 +66,70 @@ TEST_CASE("create nested keys easily") {
 
   CHECK(dict.dump() == "{\"key1\":{\"key2\":{\"key3\":1}}}");
 }
+
+TEST_CASE("Testing minify") {
+  CHECK(utils::minify(
+            "{\n    \"name\": \"John\",\n    \"age\": 30,\n    \"city\": "
+            "\"Canberra\"}") ==
+        "{\"name\":\"John\",\"age\":30,\"city\":\"Canberra\"}");
+  CHECK(utils::minify(
+            "{ \"name\": \"John\", \"age\": 30, \"city\": \"Canberra\" }") ==
+        "{\"name\":\"John\",\"age\":30,\"city\":\"Canberra\"}");
+  CHECK(utils::minify("{\"name\": \"John Smith\", \"age\": 30, \"city\": \"New "
+                      "York\", \"escaped\": \"This\\\"is\\\"escaped\"}") ==
+        "{\"name\":\"John Smith\",\"age\":30,\"city\":\"New "
+        "York\",\"escaped\":\"This\\\"is\\\"escaped\"}");
+  CHECK(utils::minify("{\"name\":\"John\",\"age\":30,\"city\":\"Canberra\"}") ==
+        "{\"name\":\"John\",\"age\":30,\"city\":\"Canberra\"}");
+}
+
+TEST_CASE("test parse") {
+
+  std::string s1 = "{\"key\": \"abc\"}";
+
+  auto json = utils::parse(s1);
+
+  CHECK(std::get<std::string>(json["key"].value()) == "abc");
+}
+
+TEST_CASE("parse empty") {
+  std::string s2 = "{}";
+  auto json = utils::parse(s2);
+  CHECK(json.dump() == "{}");
+}
+
+TEST_CASE("parse number") {
+
+  std::string s3 = "42";
+  auto json = utils::parse(s3);
+  CHECK(std::get<double>(json.value()) == 42);
+}
+
+TEST_CASE("parse array") {
+
+  std::string s4 = "[true, false, 42, [1,2,3]]";
+  auto json = utils::parse(s4);
+  CHECK(std::get<bool>(json[0].value()) == true);
+  CHECK(std::get<bool>(json[1].value()) == false);
+  CHECK(std::get<double>(json[2].value()) == 42);
+  CHECK(std::get<double>(json[3][0].value()) == 1);
+  CHECK(std::get<double>(json[3][1].value()) == 2);
+  CHECK(std::get<double>(json[3][2].value()) == 3);
+}
+
+TEST_CASE("test parse again ") {
+
+  std::string json_string =
+      "{\n  \"key1\": [1,2],\n  \"key2\": [{\"key3\":  \"val\"}]\n}";
+
+  auto json = utils::parse(json_string);
+
+  CHECK(std::get<double>(json["key1"][0].value()) == 1);
+  CHECK(json["key1"][0].get<double>() == 1);
+
+  CHECK(std::get<double>(json["key1"][1].value()) == 2);
+  CHECK(json["key1"][1].get<double>() == 2);
+
+  CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
+  CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
+}

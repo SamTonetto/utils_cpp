@@ -23,6 +23,7 @@
 namespace utils {
 
 class Json;
+class JsonParser;
 
 using JsonNull = std::nullptr_t;
 using JsonBool = bool;
@@ -49,31 +50,65 @@ using JsonArray = std::vector<Json>;
 using JsonObject = std::map<JsonString, Json>;
 
 /**
+ * Parse a string formatted as JSON.
+ * Currently, all numbers are parsed as doubles.
+ * @param json_str The string to parse.
+ */
+Json parse(std::string_view json_str);
+
+/**
+ * Parse a JSON file.
+ * Arrays [] are stored as JsonArrays, objects {} as JsonObjects.
+ */
+Json parse_file(std::string_view filename);
+
+/**
+ * Minify a JSON string.
+ */
+std::string minify(std::string_view json_str);
+
+/**
+ * Prettify a JSON string.
+ */
+std::string prettify(std::string_view json_str);
+
+/**
  * A light-weight Json class for writing to Json files.
  * Does not support parsing Json strings. Can be done in the future.
  */
 class Json {
 
+private:
+  friend JsonParser;
+
+  using ValueType =
+      std::variant<JsonObject, JsonArray, JsonNull, JsonBool, JsonChar,
+                   JsonUChar, JsonShort, JsonUShort, JsonInt, JsonUInt,
+                   JsonLong, JsonULong, JsonLongLong, JsonULongLong, JsonFloat,
+                   JsonDouble, JsonLongDouble, JsonString>;
+
+  ValueType value_;
+
 public:
-  Json() : value{JsonObject{}} {}
+  Json() : value_{JsonObject{}} {}
 
-  Json(JsonString value) : value{value} {}
-  Json(JsonBool value) : value{value} {}
+  Json(JsonString value) : value_{value} {}
+  Json(JsonBool value) : value_{value} {}
 
-  Json(JsonChar value) : value{value} {}
-  Json(JsonUChar value) : value{value} {}
-  Json(JsonShort value) : value{value} {}
-  Json(JsonUShort value) : value{value} {}
-  Json(JsonInt value) : value{value} {}
-  Json(JsonUInt value) : value{value} {}
-  Json(JsonLong value) : value{value} {}
-  Json(JsonULong value) : value{value} {}
-  Json(JsonLongLong value) : value{value} {}
-  Json(JsonULongLong value) : value{value} {}
+  Json(JsonChar value) : value_{value} {}
+  Json(JsonUChar value) : value_{value} {}
+  Json(JsonShort value) : value_{value} {}
+  Json(JsonUShort value) : value_{value} {}
+  Json(JsonInt value) : value_{value} {}
+  Json(JsonUInt value) : value_{value} {}
+  Json(JsonLong value) : value_{value} {}
+  Json(JsonULong value) : value_{value} {}
+  Json(JsonLongLong value) : value_{value} {}
+  Json(JsonULongLong value) : value_{value} {}
 
-  Json(JsonFloat value) : value{value} {}
-  Json(JsonDouble value) : value{value} {}
-  Json(JsonLongDouble value) : value{value} {}
+  Json(JsonFloat value) : value_{value} {}
+  Json(JsonDouble value) : value_{value} {}
+  Json(JsonLongDouble value) : value_{value} {}
 
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
@@ -83,7 +118,7 @@ public:
     JsonArray arr;
     arr.push_back(Json(p.first));
     arr.push_back(Json(p.second));
-    this->value = arr;
+    this->value_ = arr;
   }
 
   template <typename K, typename V>
@@ -100,7 +135,7 @@ public:
       }
     }
 
-    this->value = obj;
+    this->value_ = obj;
   }
 
   template <typename K, typename V>
@@ -118,7 +153,7 @@ public:
       }
     }
 
-    this->value = obj;
+    this->value_ = obj;
   }
 
   template <typename T>
@@ -128,59 +163,156 @@ public:
     for (const auto &el : value) {
       arr.push_back(Json(el));
     }
-    this->value = arr;
+    this->value_ = arr;
   }
 
   Json &operator[](const JsonString &key) {
 
-    if (!std::get<JsonObject>(value).contains(key)) {
-      std::get<JsonObject>(value)[key] = Json();
+    if (!std::get<JsonObject>(value_).contains(key)) {
+      std::get<JsonObject>(value_)[key] = Json();
     }
-    return std::get<JsonObject>(value)[key];
+    return std::get<JsonObject>(value_)[key];
+  }
+
+  const Json &operator[](const JsonString &key) const {
+    return std::get<JsonObject>(value_).at(key);
+  }
+
+  Json &operator[](const JsonULongLong &index) {
+    return std::get<JsonArray>(value_)[index];
+  }
+
+  const Json &operator[](const JsonULongLong &index) const {
+    return std::get<JsonArray>(value_)[index];
+  }
+
+  const ValueType &value() const { return value_; }
+  ValueType value() { return value_; }
+
+  template <typename T>
+  T get() const {
+    return std::get<T>(value_);
   }
 
 public:
   template <typename T>
-  Json &operator=(const T &value) {
+  Json &operator=(const T &val) {
     if constexpr (is_same_container_v<std::vector, T>) {
-      this->value = ValueType(JsonArray{});
-      for (const auto &el : value) {
-        std::get<JsonArray>(this->value).push_back(Json(el));
+      this->value_ = ValueType(JsonArray{});
+      for (const auto &el : val) {
+        std::get<JsonArray>(this->value_).push_back(Json(el));
       }
     } else if constexpr (is_same_container_v<std::pair, T>) {
-      this->value = ValueType(JsonArray{});
-      std::get<JsonArray>(this->value).push_back(Json(value.first));
-      std::get<JsonArray>(this->value).push_back(Json(value.second));
+      this->value_ = ValueType(JsonArray{});
+      std::get<JsonArray>(this->value_).push_back(Json(val.first));
+      std::get<JsonArray>(this->value_).push_back(Json(val.second));
     } else if constexpr (is_same_container_v<std::map, T>) {
-      this->value = ValueType(JsonObject{});
-      for (const auto &[key, val] : value) {
-        std::get<JsonObject>(this->value)[key] = Json(val);
+      this->value_ = ValueType(JsonObject{});
+      for (const auto &[key, v] : val) {
+        std::get<JsonObject>(this->value_)[key] = Json(v);
       }
     } else if constexpr (is_same_container_v<std::unordered_map, T>) {
-      this->value = ValueType(JsonObject{});
-      for (const auto &[key, val] : value) {
-        std::get<JsonObject>(this->value)[key] = Json(val);
+      this->value_ = ValueType(JsonObject{});
+      for (const auto &[key, v] : val) {
+        std::get<JsonObject>(this->value_)[key] = Json(v);
       }
     } else {
-      this->value = ValueType(value);
+      this->value_ = ValueType(val);
     }
     return *this;
   }
-
-private:
-  using ValueType =
-      std::variant<JsonNull, JsonBool, JsonChar, JsonUChar, JsonShort,
-                   JsonUShort, JsonInt, JsonUInt, JsonLong, JsonULong,
-                   JsonLongLong, JsonULongLong, JsonFloat, JsonDouble,
-                   JsonLongDouble, JsonString, JsonArray, JsonObject>;
-
-  ValueType value;
 
 private:
   std::stringstream &dump(std::stringstream &ss) const;
 
   std::stringstream &pretty_dump(std::stringstream &ss, int tab_size = 2,
                                  int current_offset = 0) const;
+};
+
+class JsonParser {
+public:
+  JsonParser(std::string_view json_str);
+
+  Json parse();
+
+private:
+  std::string minified;
+  std::size_t index = 0;
+
+  std::stack<std::reference_wrapper<Json>> json_stack;
+
+public:
+  // State Machine
+  struct Start {
+    void handle(JsonParser &context);
+  };
+  struct ObjKeyStart {
+    void handle(JsonParser &context);
+  };
+  struct ObjKeyEnd {
+    void handle(JsonParser &context);
+  };
+  struct ObjValStart {
+    void handle(JsonParser &context);
+  };
+  struct ObjValEnd {
+    void handle(JsonParser &context);
+  };
+  struct ArrValStart {
+    void handle(JsonParser &context);
+  };
+  struct ArrValEnd {
+    void handle(JsonParser &context);
+  };
+  struct End {
+    void handle(JsonParser &context);
+  };
+
+  using StateType = std::variant<Start, ObjKeyStart, ObjKeyEnd, ObjValStart,
+                                 ObjValEnd, ArrValStart, ArrValEnd, End>;
+
+  StateType state = Start{};
+
+  /**
+   * Handles number|bool|null|string for the current value, if object and array
+   * have already been ruled out.
+   */
+  void handle_scalar_as_obj_value();
+  void handle_scalar_in_array();
+
+  /**
+   * Seeks ahead from start_index to find a matching end quote character (that
+   * hasn't been escaped). If the end quote character is found, the string
+   * between start_index and the end quote character is returned. If the end
+   * quote character is not found, an exception is thrown.
+   */
+  std::string gather_string(std::size_t start_index);
+
+  // Common handlers
+  // As part of handling, they also manage index updating.
+  void handle_colon();
+  void handle_left_brace_in_array();
+  void handle_left_brace_as_obj_value();
+  void handle_left_bracket_in_array();
+  void handle_left_bracket_as_obj_value();
+  void handle_right_brace();
+  void handle_right_bracket();
+  void handle_scalar_isolated(); // handle a string only consisting of a scalar
+
+  template <typename State>
+  void handle(char input) {
+    std::get<State>(state).handle(*this, input);
+  }
+
+  template <typename State>
+  void transition_to() {
+    state = State{};
+  }
+
+  template <typename State>
+  bool is_current_state() {
+    return std::holds_alternative<State>(state);
+  }
 };
 
 } // namespace utils
