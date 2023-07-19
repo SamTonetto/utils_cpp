@@ -60,7 +60,7 @@ Json parse(std::string_view json_str);
  * Parse a JSON file.
  * Arrays [] are stored as JsonArrays, objects {} as JsonObjects.
  */
-Json parse_file(std::string_view filename);
+Json parse_file(const std::string &filename);
 
 /**
  * Minify a JSON string.

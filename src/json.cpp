@@ -10,7 +10,7 @@ Json parse(std::string_view json_str) {
   return parser.parse();
 }
 
-Json parse_file(std::string_view filename) {
+Json parse_file(const std::string &filename) {
   std::ifstream infile(filename);
 
   if (!infile.is_open()) {

@@ -133,3 +133,23 @@ TEST_CASE("test parse again ") {
   CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
   CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
 }
+
+TEST_CASE("test parse file") {
+
+  std::ofstream f("temporary_test_file.json");
+  f << "{\n  \"key1\": [1,2],\n  \"key2\": [{\"key3\":  \"val\"}]\n}";
+  f.close();
+
+  auto json = utils::parse_file("temporary_test_file.json");
+
+  CHECK(std::get<double>(json["key1"][0].value()) == 1);
+  CHECK(json["key1"][0].get<double>() == 1);
+
+  CHECK(std::get<double>(json["key1"][1].value()) == 2);
+  CHECK(json["key1"][1].get<double>() == 2);
+
+  CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
+  CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
+
+  std::remove("temporary_test_file.json");
+}
