@@ -27,9 +27,5 @@ TEST_CASE("join") {
   CHECK(utils::join(std::vector<std::string>{"single element"}, ",") ==
         "single element");
 
-  std::cout << "asdf" << std::endl;
-  std::cout << utils::join(std::vector<std::string>{}, ",") << std::endl;
-  std::cout << "fdsa" << std::endl;
-
   CHECK(utils::join(std::vector<std::string>{}, ",") == "");
 }
