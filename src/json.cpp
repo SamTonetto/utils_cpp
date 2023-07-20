@@ -5,6 +5,26 @@
 
 namespace utils {
 
+json_iterator_wrapper Json::begin() {
+  if (is_array()) {
+    return json_iterator_wrapper{std::get<JsonArray>(value_).begin()};
+  } else if (is_object()) {
+    return json_iterator_wrapper{std::get<JsonObject>(value_).begin()};
+  } else {
+    throw std::runtime_error("Cannot use begin() on non-iterable JSON.");
+  }
+}
+
+json_iterator_wrapper Json::end() {
+  if (is_array()) {
+    return json_iterator_wrapper{std::get<JsonArray>(value_).end()};
+  } else if (is_object()) {
+    return json_iterator_wrapper{std::get<JsonObject>(value_).end()};
+  } else {
+    throw std::runtime_error("Cannot use begin() on non-iterable JSON.");
+  }
+}
+
 Json parse(std::string_view json_str) {
   JsonParser parser(json_str);
   return parser.parse();

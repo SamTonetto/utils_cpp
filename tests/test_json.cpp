@@ -245,13 +245,92 @@ TEST_CASE("Test append_to_file method for a file with top-level array") {
   std::remove(filename.c_str()); // Clean up
 }
 
-TEST_CASE("get out vector of doubles from Json") {
+TEST_CASE("get array") {
 
   std::string json_string = "{\"key\": [0,1,2,3,4,0.5]}";
+  utils::Json json = utils::parse(json_string);
+
+  std::vector<double> v = json["key"].get_array<double>();
+
+  CHECK(v == std::vector<double>({0, 1, 2, 3, 4, 0.5}));
+}
+
+TEST_CASE("get map and umap") {
+  std::string json_string = "{\"key1\":1, \"key2\": 2, \"key3\": 3}";
+  utils::Json json = utils::parse(json_string);
+
+  SUBCASE("map") {
+    std::map<std::string, double> result = json.get_map<double>();
+
+    CHECK(result ==
+          std::map<std::string, double>{{"key1", 1}, {"key2", 2}, {"key3", 3}});
+  }
+
+  SUBCASE("unordered_map") {
+    std::unordered_map<std::string, double> result =
+        json.get_unordered_map<double>();
+
+    CHECK(result == std::unordered_map<std::string, double>{
+                        {"key1", 1}, {"key2", 2}, {"key3", 3}});
+  }
+}
+
+TEST_CASE("check number conversion") {
+
+  utils::Json json;
+
+  int x = 42;
+  long y = 42;
+  double z = 42.0;
+  std::string s = "helloworld";
+
+  json.emplace_back(x);
+  json.emplace_back(y);
+
+  CHECK(json.get_array<long>() == std::vector<long>{42, 42});
+  CHECK_THROWS(json.get_array<int>());
+
+  json.emplace_back(z);
+
+  CHECK_THROWS(json.get_array<int>());
+  CHECK_THROWS(json.get_array<long>());
+  CHECK(json.get_array<double>() == std::vector<double>{42.0, 42.0, 42.0});
+
+  json.emplace_back(s);
+
+  CHECK_THROWS(json.get_array<int>());
+  CHECK_THROWS(json.get_array<long>());
+  CHECK_THROWS(json.get_array<double>());
+  CHECK_THROWS(json.get_array<std::string>());
+}
+
+TEST_CASE("array and obj iteration") {
+
+  std::string json_string = "[{\"key1\": [0,1,2,3,4,0.5], \"key2\": [-1,-2]}, "
+                            "{\"key3\": [1,1,2,3,4,0.5]}]";
 
   utils::Json json = utils::parse(json_string);
 
-  std::vector<double> v = json["key"].get<std::vector<double>>();
+  std::vector<std::map<std::string, std::vector<double>>>
+      encoded_data_structure;
 
-  CHECK(v == std::vector<double>({0, 1, 2, 3, 4, 0.5}));
+  // Note: Could also just use for(auto array_entry : json)
+  for (utils::json_iterator_value array_entry : json) {
+
+    encoded_data_structure.push_back({});
+
+    for (utils::json_iterator_value map_entry : array_entry.value()) {
+
+      std::string key = map_entry.key(); // keys are always strings for JSON.
+      auto val = map_entry.value().get_array<double>();
+
+      encoded_data_structure.back()[key] = val;
+    }
+  }
+
+  std::vector<std::map<std::string, std::vector<double>>> correct(2);
+  correct[0] = {{"key1", {0, 1, 2, 3, 4, 0.5}}, {"key2", {-1, -2}}};
+  correct[1] = {{"key3", {1, 1, 2, 3, 4, 0.5}}};
+
+  CHECK(encoded_data_structure == correct);
 }

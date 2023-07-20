@@ -74,6 +74,9 @@ std::string minify(std::string_view json_str);
  */
 std::string prettify(std::string_view json_str);
 
+struct json_iterator_wrapper;
+struct json_iterator_value;
+
 /**
  * A light-weight Json class for writing to Json files.
  * Does not support parsing Json strings. Can be done in the future.
@@ -94,23 +97,23 @@ private:
 public:
   Json() : value_{JsonObject{}} {}
 
-  Json(JsonString value) : value_{value} {}
-  Json(JsonBool value) : value_{value} {}
+  constexpr Json(const JsonString &value) : value_{value} {}
+  constexpr Json(JsonBool value) : value_{value} {}
 
-  Json(JsonChar value) : value_{value} {}
-  Json(JsonUChar value) : value_{value} {}
-  Json(JsonShort value) : value_{value} {}
-  Json(JsonUShort value) : value_{value} {}
-  Json(JsonInt value) : value_{value} {}
-  Json(JsonUInt value) : value_{value} {}
-  Json(JsonLong value) : value_{value} {}
-  Json(JsonULong value) : value_{value} {}
-  Json(JsonLongLong value) : value_{value} {}
-  Json(JsonULongLong value) : value_{value} {}
+  constexpr Json(JsonChar value) : value_{value} {}
+  constexpr Json(JsonUChar value) : value_{value} {}
+  constexpr Json(JsonShort value) : value_{value} {}
+  constexpr Json(JsonUShort value) : value_{value} {}
+  constexpr Json(JsonInt value) : value_{value} {}
+  constexpr Json(JsonUInt value) : value_{value} {}
+  constexpr Json(JsonLong value) : value_{value} {}
+  constexpr Json(JsonULong value) : value_{value} {}
+  constexpr Json(JsonLongLong value) : value_{value} {}
+  constexpr Json(JsonULongLong value) : value_{value} {}
 
-  Json(JsonFloat value) : value_{value} {}
-  Json(JsonDouble value) : value_{value} {}
-  Json(JsonLongDouble value) : value_{value} {}
+  constexpr Json(JsonFloat value) : value_{value} {}
+  constexpr Json(JsonDouble value) : value_{value} {}
+  constexpr Json(JsonLongDouble value) : value_{value} {}
 
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
@@ -156,7 +159,7 @@ public:
     json.write_to_file(filename);
   }
 
-  bool empty() const {
+  constexpr bool empty() const {
     if (is_array()) {
       return std::get<JsonArray>(value_).empty();
     } else if (is_object()) {
@@ -166,9 +169,13 @@ public:
     }
   }
 
-  bool is_array() const { return std::holds_alternative<JsonArray>(value_); }
-  bool is_object() const { return std::holds_alternative<JsonObject>(value_); }
-  bool is_scalar() const { return !is_array() && !is_object(); }
+  constexpr bool is_array() const {
+    return std::holds_alternative<JsonArray>(value_);
+  }
+  constexpr bool is_object() const {
+    return std::holds_alternative<JsonObject>(value_);
+  }
+  constexpr bool is_scalar() const { return !is_array() && !is_object(); }
 
   template <typename T1, typename T2>
   Json(const std::pair<T1, T2> &p) {
@@ -257,26 +264,90 @@ public:
   const ValueType &value() const { return value_; }
   ValueType value() { return value_; }
 
+  /**
+   * Number aware visitor is a visitor that just returns the type, unless it is
+   * a number, in which case it obeys the following rules:
+   * 1. Allow conversion from integral to floating-point types, but not the
+   *    other way.
+   * 2. Prevent downconversion but allow upconversion within integral types and
+   *    within floating point types separately.
+   */
+  template <typename RequestedType>
+  struct number_aware_visitor {
+
+    template <typename StoredType>
+    RequestedType operator()(const StoredType &u) const {
+      if constexpr (std::is_arithmetic_v<RequestedType> &&
+                    std::is_arithmetic_v<StoredType>) {
+        if (std::is_integral_v<RequestedType> &&
+            std::is_floating_point_v<StoredType>) {
+          throw std::runtime_error(
+              "Invalid conversion, precision would be lost due to "
+              "integral/floating-point cross-conversion");
+        } else if constexpr (sizeof(RequestedType) < sizeof(StoredType)) {
+          throw std::runtime_error("Invalid conversion, precision would be "
+                                   "lost due to downconversion");
+        } else {
+          return static_cast<RequestedType>(u);
+        }
+      } else if constexpr (std::is_same_v<RequestedType, StoredType>) {
+        return static_cast<StoredType>(u);
+      } else {
+        throw std::runtime_error("Unable to extract type");
+      }
+    }
+  };
+
+  /**
+   * Number-aware getting.
+   */
   template <typename T>
   T get() const {
-    return std::get<T>(value_);
+    return std::visit(number_aware_visitor<T>{}, value_);
   }
 
-  template <>
-  std::vector<double> get<std::vector<double>>() const {
-    std::vector<double> result;
+  template <typename T>
+  std::vector<T> get_array() const {
+    std::vector<T> result;
     result.reserve(this->size());
+
     for (const auto &x : std::get<JsonArray>(value_)) {
-      result.push_back(std::get<JsonDouble>(x.value_));
+      result.emplace_back(x.get<T>());
     }
+
     return result;
   }
+
+  template <typename V>
+  std::map<std::string, V> get_map() const {
+    std::map<std::string, V> result;
+
+    for (const auto &[k, v] : std::get<JsonObject>(value_)) {
+      result.emplace(k, v.get<V>());
+    }
+
+    return result;
+  }
+
+  template <typename V>
+  std::unordered_map<std::string, V> get_unordered_map() const {
+    std::unordered_map<std::string, V> result;
+
+    for (const auto &[k, v] : std::get<JsonObject>(value_)) {
+      result.emplace(k, v.get<V>());
+    }
+
+    return result;
+  }
+
+  json_iterator_wrapper begin();
+  json_iterator_wrapper end();
 
   /**
    * Get size of the top-level Json value_. If array, return length, if
    * object, return number of key-val pairs, if scalar, return 1.
    */
-  std::size_t size() const {
+  constexpr std::size_t size() const {
     if (empty()) {
       return 0;
     } else if (is_array()) {
@@ -288,7 +359,19 @@ public:
     }
   }
 
-  void push_back(const Json &json) {
+  template <typename... Args>
+  constexpr void emplace_back(Args &&...args) {
+    if (this->is_array()) {
+      std::get<JsonArray>(value_).emplace_back(std::forward<Args>(args)...);
+    } else if (this->empty()) {
+      value_.emplace<JsonArray>();
+      std::get<JsonArray>(value_).emplace_back(std::forward<Args>(args)...);
+    } else {
+      throw std::runtime_error("Cannot emplace_back to a non-array JSON.");
+    }
+  }
+
+  constexpr void push_back(const Json &json) {
     if (this->is_array()) {
       std::get<JsonArray>(value_).push_back(json);
     } else if (this->empty()) {
@@ -332,6 +415,94 @@ private:
 
   std::stringstream &pretty_dump(std::stringstream &ss, int tab_size = 2,
                                  int current_offset = 0) const;
+};
+
+// ========== ITERATORS ============
+
+struct json_iterator_value {
+
+  using JsonRef = std::reference_wrapper<Json>;
+  using JsonKeyValRef =
+      std::reference_wrapper<std::pair<const std::string, Json>>;
+
+  std::variant<JsonRef, JsonKeyValRef> v_;
+
+  json_iterator_value(Json *json) : v_{*json} {}
+  json_iterator_value(std::pair<const std::string, Json> *p) : v_{*p} {}
+
+  std::string key() { return std::get<JsonKeyValRef>(v_).get().first; }
+  const std::string &key() const {
+    return std::get<JsonKeyValRef>(v_).get().first;
+  }
+
+  Json &value() {
+
+    return std::visit(
+        [this](auto &&arg) -> Json & {
+          using T = std::decay_t<decltype(arg)>;
+          if (std::is_same_v<T, JsonRef>) {
+            return std::get<JsonRef>(this->v_).get();
+          } else {
+            return std::get<JsonKeyValRef>(this->v_).get().second;
+          }
+        },
+        v_);
+  }
+
+  const Json &value() const {
+    return std::visit(
+        [this](auto &&arg) -> Json & {
+          using T = std::decay_t<decltype(arg)>;
+          if (std::is_same_v<T, JsonRef>) {
+            return std::get<JsonRef>(this->v_).get();
+          } else {
+            return std::get<JsonKeyValRef>(this->v_).get().second;
+          }
+        },
+        v_);
+  }
+};
+
+struct json_iterator_wrapper {
+
+  using JsonIteratorType =
+      std::variant<JsonArray::iterator, JsonObject::iterator>;
+
+  JsonIteratorType it;
+
+  constexpr bool is_array_iterator() const {
+    return std::holds_alternative<JsonArray::iterator>(it);
+  }
+  constexpr bool is_object_iterator() {
+    return std::holds_alternative<JsonObject::iterator>(it);
+  }
+
+  json_iterator_wrapper &operator++() {
+    if (is_array_iterator()) {
+      ++std::get<JsonArray::iterator>(it);
+    } else if (is_object_iterator()) {
+      ++std::get<JsonObject::iterator>(it);
+    }
+    return *this;
+  }
+
+  constexpr bool operator!=(const json_iterator_wrapper &other) const {
+    return it != other.it;
+  }
+
+  constexpr bool operator==(const json_iterator_wrapper &other) const {
+    return it != other.it;
+  }
+
+  json_iterator_value operator*() {
+    if (is_array_iterator()) {
+      return json_iterator_value(&*std::get<JsonArray::iterator>(it));
+    } else if (is_object_iterator()) {
+      return json_iterator_value(&*std::get<JsonObject::iterator>(it));
+    }
+
+    throw std::runtime_error("Cannot dereference iterator.");
+  }
 };
 
 class JsonParser {

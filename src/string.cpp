@@ -47,11 +47,26 @@ std::string join(const std::vector<std::string> &strings,
 }
 
 bool convertible_to_double(const std::string &s) {
+  // no extraneous leading zeros
+  if ((s.size() > 1 && s[0] == '0' && s[1] != '.') ||
+      (s.size() > 2 && s[0] == '-' && s[1] == '0' && s[1] != '.'))
+    return false;
+
   std::istringstream iss(s);
   double d;
-  iss >> std::noskipws >> d; // noskipws considers leading whitespace invalid
-  // Check the entire string was consumed and if either failbit or badbit is
-  // set
+  iss >> std::noskipws >> d;
+  return iss.eof() && !iss.fail();
+}
+
+bool convertible_to_int(const std::string &s) {
+
+  if ((s.size() > 1 && s[0] == '0') ||
+      (s.size() > 2 && s[0] == '-' && s[1] == '0'))
+    return false;
+
+  std::istringstream iss(s);
+  int d;
+  iss >> std::noskipws >> d;
   return iss.eof() && !iss.fail();
 }
 
