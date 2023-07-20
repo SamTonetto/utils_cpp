@@ -190,7 +190,7 @@ TEST_CASE("Test write_to_file method") {
 
   std::string content((std::istreambuf_iterator<char>(file)),
                       std::istreambuf_iterator<char>());
-  CHECK(content == R"({"key":"value"})");
+  CHECK(content == "{\"key\":\"value\"}");
 
   std::remove(filename.c_str()); // Clean up
 }
@@ -198,7 +198,7 @@ TEST_CASE("Test write_to_file method") {
 TEST_CASE("Test load_from_file method") {
   std::string filename = "test_load_file.json";
   std::ofstream outfile(filename);
-  outfile << R"({"key":"value"})";
+  outfile << "{\"key\":\"value\"}";
   outfile.close();
 
   utils::Json json;
@@ -236,8 +236,6 @@ TEST_CASE("Test create and then append to file") {
   utils::Json jsonFromFile;
   jsonFromFile.load_from_file(filename);
 
-  std::cout << "jsonFromFile.dump() = " << jsonFromFile.dump() << std::endl;
-
   CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
 
   std::remove(filename.c_str()); // Clean up
@@ -246,18 +244,19 @@ TEST_CASE("Test create and then append to file") {
 TEST_CASE("Test append_to_file method for a file with top-level array") {
   std::string filename = "test_append_file_array.json";
   std::ofstream outfile(filename);
-  outfile << R"([{"key":"value1"}])";
+  outfile << "[{\"key\":\"value1\"}]";
   outfile.close();
 
   utils::Json json;
-  json["key"] = "value2";
+  json["key2"] = "value2";
+
   json.append_to_file(filename);
 
   utils::Json jsonFromFile;
   jsonFromFile.load_from_file(filename);
 
   CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
-  CHECK(jsonFromFile[1]["key"].get<std::string>() == "value2");
+  CHECK(jsonFromFile[1]["key2"].get<std::string>() == "value2");
 
   std::remove(filename.c_str()); // Clean up
 }

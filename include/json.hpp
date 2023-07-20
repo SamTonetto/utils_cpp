@@ -151,9 +151,13 @@ public:
 
     if (!std::filesystem::exists(filename)) {
 
-      Json json{JsonArray{}};
+      Json json;
+      json.value_.emplace<JsonArray>();
       std::get<JsonArray>(json.value_).push_back(*this);
-      json.write_to_file(filename);
+
+      std::ofstream outfilestream(filename, std::ios_base::app);
+      outfilestream << json.dump();
+      outfilestream.close();
 
     } else {
 
@@ -162,15 +166,42 @@ public:
       if (json.empty()) {
         json.value_.emplace<JsonArray>();
         std::get<JsonArray>(json.value_).push_back(*this);
+        std::ofstream outfilestream(filename, std::ios_base::app);
+        outfilestream << json.dump();
+        outfilestream.close();
+
       } else if (json.is_array()) {
-        std::get<JsonArray>(json.value_).push_back(*this);
+        // Look for last occurrence of "]" in file, replace it with ",". Also,
+        // read file in reverse for better performance.
+        std::fstream filestream(filename,
+                                std::ios_base::binary | std::ios_base::ate |
+                                    std::ios_base::in | std::ios_base::out);
+
+        for (long long i = filestream.tellg(); i >= 0; --i) {
+          filestream.clear();
+
+          filestream.seekg(i, std::ios_base::beg);
+          char c = filestream.peek();
+
+          if (!std::isspace(static_cast<unsigned char>(c))) {
+            if (c == ']') {
+              filestream.seekp(i, std::ios_base::beg);
+              filestream.put(',');
+              break;
+            }
+          }
+        }
+        filestream.close();
+
+        std::ofstream outfilestream(filename, std::ios_base::app);
+        outfilestream << this->dump();
+        outfilestream.close();
+
       } else {
         throw std::runtime_error(
             "Cannot append to file. Either file must be "
-            "empty, or top-level element must be an array.");
+            "empty, non-existent, or top-level element must be an array.");
       }
-
-      json.write_to_file(filename);
     }
   }
 
