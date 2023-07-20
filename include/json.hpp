@@ -1,5 +1,5 @@
 /**********************************************************************
- * @brief A lightweight JSON writer
+ * @brief A(n increasing less) lightweight JSON writer (and now parser)
  * @details
  * @author Sam Tonetto
  * @copyright GNU Public License
@@ -9,6 +9,7 @@
 #pragma once
 
 #include <any>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -138,25 +139,39 @@ public:
   }
 
   /**
-   * Append to an existing JSON file.
-   * Only works if the top-level element of the JSON file is an array, so that
-   * the new JSON can be appended as a new element.
+   * Append to a file as a new array element.
+   * Only works if either
+   * 1. The top-level element of the JSON file is an array, or
+   * 2. The file is empty (in which case *this is written as 0th element of an
+   array), or
+   * 3. The file doesn't exist, in which case the file is created then step 2
+   is performed.
    */
   void append_to_file(const std::string &filename) {
 
-    Json json = parse_file(filename);
+    if (!std::filesystem::exists(filename)) {
 
-    if (json.empty()) {
-      json.value_.emplace<JsonArray>();
+      Json json{JsonArray{}};
       std::get<JsonArray>(json.value_).push_back(*this);
-    } else if (json.is_array()) {
-      std::get<JsonArray>(json.value_).push_back(*this);
+      json.write_to_file(filename);
+
     } else {
-      throw std::runtime_error("Cannot append to file. Either file must be "
-                               "empty, or top-level element must be an array.");
-    }
 
-    json.write_to_file(filename);
+      Json json = parse_file(filename);
+
+      if (json.empty()) {
+        json.value_.emplace<JsonArray>();
+        std::get<JsonArray>(json.value_).push_back(*this);
+      } else if (json.is_array()) {
+        std::get<JsonArray>(json.value_).push_back(*this);
+      } else {
+        throw std::runtime_error(
+            "Cannot append to file. Either file must be "
+            "empty, or top-level element must be an array.");
+      }
+
+      json.write_to_file(filename);
+    }
   }
 
   constexpr bool empty() const {

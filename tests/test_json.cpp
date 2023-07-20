@@ -226,6 +226,23 @@ TEST_CASE("Test append_to_file method for an empty file") {
   std::remove(filename.c_str()); // Clean up
 }
 
+TEST_CASE("Test create and then append to file") {
+  std::string filename = "test_create_append_file.json";
+
+  utils::Json json;
+  json["key"] = "value1";
+  json.append_to_file(filename);
+
+  utils::Json jsonFromFile;
+  jsonFromFile.load_from_file(filename);
+
+  std::cout << "jsonFromFile.dump() = " << jsonFromFile.dump() << std::endl;
+
+  CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
+
+  std::remove(filename.c_str()); // Clean up
+}
+
 TEST_CASE("Test append_to_file method for a file with top-level array") {
   std::string filename = "test_append_file_array.json";
   std::ofstream outfile(filename);
