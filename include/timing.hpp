@@ -10,10 +10,24 @@
 
 #include <chrono>
 #include <future>
+#include <iomanip>
 #include <optional>
+#include <sstream>
 #include <utility>
 
 namespace utils {
+
+/**
+ * Basic utility to get current time.
+ */
+inline std::string get_current_time() {
+  auto now = std::chrono::system_clock::now();
+  auto now_time_t = std::chrono::system_clock::to_time_t(now);
+  auto tm = std::localtime(&now_time_t);
+  std::stringstream time_stream;
+  time_stream << std::put_time(tm, "%Y-%m-%d %H:%M:%S");
+  return time_stream.str();
+}
 
 /**
  * Timing decorator. You can wrap any function in it and it will return a pair,
