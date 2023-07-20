@@ -9,6 +9,7 @@
 #pragma once
 
 #include <any>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -112,6 +113,61 @@ public:
 
   std::string dump() const;
   std::string pretty_dump(int tab_size = 2) const;
+
+  /**
+   * Write to file, overwriting anything existing.
+   * Creates the file if it doesn't exist.
+   */
+  void write_to_file(const std::string &filename) {
+    std::ofstream outfile(filename);
+    if (outfile.is_open()) {
+      outfile << this->dump();
+      outfile.close();
+    }
+  }
+
+  /**
+   * Load from a JSON file into the current object.
+   */
+  void load_from_file(const std::string &filename) {
+    *this = parse_file(filename);
+  }
+
+  /**
+   * Append to an existing JSON file.
+   * Only works if the top-level element of the JSON file is an array, so that
+   * the new JSON can be appended as a new element.
+   */
+  void append_to_file(const std::string &filename) {
+
+    Json json = parse_file(filename);
+
+    if (json.empty()) {
+      json.value_.emplace<JsonArray>();
+      std::get<JsonArray>(json.value_).push_back(*this);
+    } else if (json.is_array()) {
+      std::get<JsonArray>(json.value_).push_back(*this);
+    } else {
+      throw std::runtime_error("Cannot append to file. Either file must be "
+                               "empty, or top-level element must be an array.");
+    }
+
+    json.write_to_file(filename);
+  }
+
+  bool empty() {
+    if (is_array()) {
+      return std::get<JsonArray>(value_).empty();
+    } else if (is_object()) {
+      return std::get<JsonObject>(value_).empty();
+    } else {
+      return false;
+    }
+  }
+
+  bool is_array() const { return std::holds_alternative<JsonArray>(value_); }
+  bool is_object() const { return std::holds_alternative<JsonObject>(value_); }
+  bool is_scalar() const { return !is_array() && !is_object(); }
 
   template <typename T1, typename T2>
   Json(const std::pair<T1, T2> &p) {

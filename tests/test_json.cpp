@@ -90,12 +90,20 @@ TEST_CASE("test parse") {
   auto json = utils::parse(s1);
 
   CHECK(std::get<std::string>(json["key"].value()) == "abc");
+
+  CHECK_FALSE(json.is_scalar());
+  CHECK(json.is_object());
+  CHECK_FALSE(json.is_array());
 }
 
 TEST_CASE("parse empty") {
   std::string s2 = "{}";
   auto json = utils::parse(s2);
   CHECK(json.dump() == "{}");
+
+  CHECK_FALSE(json.is_scalar());
+  CHECK(json.is_object());
+  CHECK_FALSE(json.is_array());
 }
 
 TEST_CASE("parse number") {
@@ -103,6 +111,10 @@ TEST_CASE("parse number") {
   std::string s3 = "42";
   auto json = utils::parse(s3);
   CHECK(std::get<double>(json.value()) == 42);
+
+  CHECK(json.is_scalar());
+  CHECK_FALSE(json.is_object());
+  CHECK_FALSE(json.is_array());
 }
 
 TEST_CASE("parse array") {
@@ -115,6 +127,10 @@ TEST_CASE("parse array") {
   CHECK(std::get<double>(json[3][0].value()) == 1);
   CHECK(std::get<double>(json[3][1].value()) == 2);
   CHECK(std::get<double>(json[3][2].value()) == 3);
+
+  CHECK(json.is_array());
+  CHECK_FALSE(json.is_object());
+  CHECK_FALSE(json.is_scalar());
 }
 
 TEST_CASE("test parse again ") {
@@ -132,6 +148,10 @@ TEST_CASE("test parse again ") {
 
   CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
   CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
+
+  CHECK_FALSE(json.is_scalar());
+  CHECK(json.is_object());
+  CHECK_FALSE(json.is_array());
 }
 
 TEST_CASE("test parse file") {
@@ -151,5 +171,76 @@ TEST_CASE("test parse file") {
   CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
   CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
 
+  CHECK_FALSE(json.is_scalar());
+  CHECK(json.is_object());
+  CHECK_FALSE(json.is_array());
+
   std::remove("temporary_test_file.json");
+}
+
+TEST_CASE("Test write_to_file method") {
+  utils::Json json;
+  json["key"] = "value"; // Assuming the Json class works this way
+
+  std::string filename = "test_file.json";
+  json.write_to_file(filename);
+
+  std::ifstream file(filename);
+  CHECK(file.is_open());
+
+  std::string content((std::istreambuf_iterator<char>(file)),
+                      std::istreambuf_iterator<char>());
+  CHECK(content == R"({"key":"value"})");
+
+  std::remove(filename.c_str()); // Clean up
+}
+
+TEST_CASE("Test load_from_file method") {
+  std::string filename = "test_load_file.json";
+  std::ofstream outfile(filename);
+  outfile << R"({"key":"value"})";
+  outfile.close();
+
+  utils::Json json;
+  json.load_from_file(filename);
+
+  CHECK(json["key"].get<std::string>() == "value");
+
+  std::remove(filename.c_str()); // Clean up
+}
+
+TEST_CASE("Test append_to_file method for an empty file") {
+  std::string filename = "test_append_file_empty.json";
+  std::ofstream outfile(filename);
+  outfile.close(); // Create an empty file
+
+  utils::Json json;
+  json["key"] = "value1";
+  json.append_to_file(filename);
+
+  utils::Json jsonFromFile;
+  jsonFromFile.load_from_file(filename);
+
+  CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
+
+  std::remove(filename.c_str()); // Clean up
+}
+
+TEST_CASE("Test append_to_file method for a file with top-level array") {
+  std::string filename = "test_append_file_array.json";
+  std::ofstream outfile(filename);
+  outfile << R"([{"key":"value1"}])";
+  outfile.close();
+
+  utils::Json json;
+  json["key"] = "value2";
+  json.append_to_file(filename);
+
+  utils::Json jsonFromFile;
+  jsonFromFile.load_from_file(filename);
+
+  CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
+  CHECK(jsonFromFile[1]["key"].get<std::string>() == "value2");
+
+  std::remove(filename.c_str()); // Clean up
 }
