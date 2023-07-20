@@ -244,3 +244,14 @@ TEST_CASE("Test append_to_file method for a file with top-level array") {
 
   std::remove(filename.c_str()); // Clean up
 }
+
+TEST_CASE("get out vector of doubles from Json") {
+
+  std::string json_string = "{\"key\": [0,1,2,3,4,0.5]}";
+
+  utils::Json json = utils::parse(json_string);
+
+  std::vector<double> v = json["key"].get<std::vector<double>>();
+
+  CHECK(v == std::vector<double>({0, 1, 2, 3, 4, 0.5}));
+}

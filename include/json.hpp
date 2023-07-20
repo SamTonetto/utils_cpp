@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "compiletime.hpp"
+#include "string.hpp"
 
 namespace utils {
 
@@ -261,9 +262,19 @@ public:
     return std::get<T>(value_);
   }
 
+  template <>
+  std::vector<double> get<std::vector<double>>() const {
+    std::vector<double> result;
+    result.reserve(this->size());
+    for (const auto &x : std::get<JsonArray>(value_)) {
+      result.push_back(std::get<JsonDouble>(x.value_));
+    }
+    return result;
+  }
+
   /**
-   * Get size of the top-level Json value_. If array, return length, if object,
-   * return number of key-val pairs, if scalar, return 1.
+   * Get size of the top-level Json value_. If array, return length, if
+   * object, return number of key-val pairs, if scalar, return 1.
    */
   std::size_t size() const {
     if (empty()) {
@@ -368,8 +379,8 @@ public:
   StateType state = Start{};
 
   /**
-   * Handles number|bool|null|string for the current value, if object and array
-   * have already been ruled out.
+   * Handles number|bool|null|string for the current value, if object and
+   * array have already been ruled out.
    */
   void handle_scalar_as_obj_value();
   void handle_scalar_in_array();
