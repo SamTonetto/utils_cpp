@@ -155,7 +155,7 @@ public:
     json.write_to_file(filename);
   }
 
-  bool empty() {
+  bool empty() const {
     if (is_array()) {
       return std::get<JsonArray>(value_).empty();
     } else if (is_object()) {
@@ -259,6 +259,22 @@ public:
   template <typename T>
   T get() const {
     return std::get<T>(value_);
+  }
+
+  /**
+   * Get size of the top-level Json value_. If array, return length, if object,
+   * return number of key-val pairs, if scalar, return 1.
+   */
+  std::size_t size() const {
+    if (empty()) {
+      return 0;
+    } else if (is_array()) {
+      return std::get<JsonArray>(value_).size();
+    } else if (is_object()) {
+      return std::get<JsonObject>(value_).size();
+    } else {
+      return 1;
+    }
   }
 
   void push_back(const Json &json) {
