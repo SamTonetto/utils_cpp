@@ -224,10 +224,21 @@ public:
 
   Json &operator[](const JsonString &key) {
 
-    if (!std::get<JsonObject>(value_).contains(key)) {
+    if (this->is_object()) {
+      if (!std::get<JsonObject>(value_).contains(key)) {
+        std::get<JsonObject>(value_)[key] = Json();
+      }
+    } else if (this->empty()) {
+      value_.emplace<JsonObject>();
       std::get<JsonObject>(value_)[key] = Json();
+    } else {
+      throw std::runtime_error("Cannot use operator[] on non-object JSON.");
     }
     return std::get<JsonObject>(value_)[key];
+  }
+
+  const Json &at(const JsonString &key) const {
+    return std::get<JsonObject>(value_).at(key);
   }
 
   const Json &operator[](const JsonString &key) const {
@@ -248,6 +259,17 @@ public:
   template <typename T>
   T get() const {
     return std::get<T>(value_);
+  }
+
+  void push_back(const Json &json) {
+    if (this->is_array()) {
+      std::get<JsonArray>(value_).push_back(json);
+    } else if (this->empty()) {
+      value_.emplace<JsonArray>();
+      std::get<JsonArray>(value_).push_back(json);
+    } else {
+      throw std::runtime_error("Cannot push_back to a non-array JSON.");
+    }
   }
 
 public:
