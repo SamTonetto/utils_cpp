@@ -194,7 +194,7 @@ public:
         filestream.close();
 
         std::ofstream outfilestream(filename, std::ios_base::app);
-        outfilestream << this->dump();
+        outfilestream << this->dump() << ']';
         outfilestream.close();
 
       } else {
@@ -428,6 +428,11 @@ public:
     }
   }
 
+  Json &back() { return std::get<JsonArray>(value_).back(); }
+  Json &front() { return std::get<JsonArray>(value_).front(); }
+  const Json &back() const { return std::get<JsonArray>(value_).back(); }
+  const Json &front() const { return std::get<JsonArray>(value_).front(); }
+
 public:
   template <typename T>
   Json &operator=(const T &val) {
@@ -561,17 +566,13 @@ private:
   std::string minified;
   std::size_t index = 0;
 
-  std::stack<std::reference_wrapper<Json>> json_stack;
+  std::stack<std::reference_wrapper<Json>> stack;
 
 public:
-  // State Machine
   struct Start {
     void handle(JsonParser &context);
   };
-  struct ObjKeyStart {
-    void handle(JsonParser &context);
-  };
-  struct ObjKeyEnd {
+  struct ObjKey {
     void handle(JsonParser &context);
   };
   struct ObjValStart {
@@ -586,21 +587,11 @@ public:
   struct ArrValEnd {
     void handle(JsonParser &context);
   };
-  struct End {
-    void handle(JsonParser &context);
-  };
 
-  using StateType = std::variant<Start, ObjKeyStart, ObjKeyEnd, ObjValStart,
-                                 ObjValEnd, ArrValStart, ArrValEnd, End>;
+  using StateType = std::variant<Start, ObjKey, ObjValStart, ObjValEnd,
+                                 ArrValStart, ArrValEnd>;
 
   StateType state = Start{};
-
-  /**
-   * Handles number|bool|null|string for the current value, if object and
-   * array have already been ruled out.
-   */
-  void handle_scalar_as_obj_value();
-  void handle_scalar_in_array();
 
   /**
    * Seeks ahead from start_index to find a matching end quote character (that
@@ -610,16 +601,8 @@ public:
    */
   std::string gather_string(std::size_t start_index);
 
-  // Common handlers
-  // As part of handling, they also manage index updating.
-  void handle_colon();
-  void handle_left_brace_in_array();
-  void handle_left_brace_as_obj_value();
-  void handle_left_bracket_in_array();
-  void handle_left_bracket_as_obj_value();
-  void handle_right_brace();
-  void handle_right_bracket();
-  void handle_scalar_isolated(); // handle a string only consisting of a scalar
+  std::size_t handle_closing_parenthesis();
+  std::size_t handle_scalar();
 
   template <typename State>
   void handle(char input) {
@@ -627,13 +610,42 @@ public:
   }
 
   template <typename State>
-  void transition_to() {
-    state = State{};
+  void go_to() {
+    state.emplace<State>();
   }
 
   template <typename State>
   bool is_current_state() {
     return std::holds_alternative<State>(state);
+  }
+
+  template <typename T, typename... Args>
+  void emplace_top(Args &&...args) {
+    stack.top().get().value_.emplace<T>(std::forward<Args>(args)...);
+  }
+
+  Json &top() { return stack.top().get(); }
+  const Json &top() const { return stack.top().get(); }
+
+  std::string get_state_string() {
+    return std::visit(
+        [](auto &&arg) {
+          using T = std::decay_t<decltype(arg)>;
+          if (std::is_same_v<Start, T>) {
+            return "Start";
+          } else if (std::is_same_v<ObjKey, T>) {
+            return "ObjKey";
+          } else if (std::is_same_v<ObjValStart, T>) {
+            return "ObjValStart";
+          } else if (std::is_same_v<ObjValEnd, T>) {
+            return "ObjValEnd";
+          } else if (std::is_same_v<ArrValStart, T>) {
+            return "ArrValStart";
+          } else if (std::is_same_v<ArrValEnd, T>) {
+            return "ArrValEnd";
+          }
+        },
+        state);
   }
 };
 

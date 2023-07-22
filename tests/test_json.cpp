@@ -231,14 +231,25 @@ TEST_CASE("Test create and then append to file") {
 
   utils::Json json;
   json["key"] = "value1";
+
   json.append_to_file(filename);
 
   utils::Json jsonFromFile;
+
   jsonFromFile.load_from_file(filename);
 
   CHECK(jsonFromFile[0]["key"].get<std::string>() == "value1");
 
   std::remove(filename.c_str()); // Clean up
+}
+
+TEST_CASE("test throw exception if no ending bracket") {
+
+  std::string json_str1 = "[{\"k1\": 1, \"k2\": 2}]";
+  std::string json_str2 = "[{\"k1\": 1, \"k2\": 2}";
+
+  CHECK_NOTHROW(utils::parse(json_str1));
+  CHECK_THROWS(utils::parse(json_str2));
 }
 
 TEST_CASE("Test append_to_file method for a file with top-level array") {
