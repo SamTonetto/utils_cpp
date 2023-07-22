@@ -418,7 +418,7 @@ std::size_t JsonParser::handle_scalar() {
   } else {
 
     std::string s;
-    int i = index;
+    std::size_t i = index;
     while (i < minified.size() && minified[i] != ',' && minified[i] != '}' &&
            minified[i] != ']') {
       s += minified[i];

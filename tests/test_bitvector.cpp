@@ -22,7 +22,7 @@ TEST_CASE("create, set and iterate through bitvector") {
 
   SUBCASE("iterate all") {
     std::stringstream ss;
-    for (int i = 0; i < bv.size(); ++i) {
+    for (std::size_t i = 0; i < bv.size(); ++i) {
       ss << bv[i] << ' ';
     }
     CHECK(ss.str() == "1 0 1 0 0 0 0 1 ");
