@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <array>
 #include <map>
 #include <set>
 #include <tuple>
@@ -43,10 +44,10 @@ inline void symmetric_hash_combine(std::size_t &seed, const T &v) {
 template <typename T1, typename T2>
 struct pair_hash {
   std::size_t operator()(const std::pair<T1, T2> &p) const {
-    std::size_t hash = 0;
-    hash_combine(hash, p.first);
-    hash_combine(hash, p.second);
-    return hash;
+    std::size_t seed = 0;
+    hash_combine(seed, p.first);
+    hash_combine(seed, p.second);
+    return seed;
   }
 };
 
@@ -57,10 +58,24 @@ template <typename T1, typename T2>
 struct symmetric_pair_hash {
 
   std::size_t operator()(const std::pair<T1, T2> &pair) const {
-    std::size_t hash = 0;
-    symmetric_hash_combine(hash, pair.first);
-    symmetric_hash_combine(hash, pair.second);
-    return hash;
+    std::size_t seed = 0;
+    symmetric_hash_combine(seed, pair.first);
+    symmetric_hash_combine(seed, pair.second);
+    return seed;
+  }
+};
+
+/**
+ * @brief Necessary for KeyEquals template parameter of unordered_set and
+ * unordered_map.
+ *
+ */
+template <typename T1, typename T2>
+struct symmetric_pair_equal {
+  bool operator()(const std::pair<T1, T2> &p1,
+                  const std::pair<T1, T2> &p2) const {
+    return (p1.first == p2.first && p1.second == p2.second) ||
+           (p1.first == p2.second && p1.second == p2.first);
   }
 };
 
@@ -75,6 +90,90 @@ struct vector_hash {
       hash_combine(seed, elem);
     }
     return seed;
+  }
+};
+
+/**
+ * @brief Permutation-invariant hash function for an std::vector.
+ */
+template <typename T>
+struct symmetric_vector_hash {
+  std::size_t operator()(const std::vector<T> &v) const {
+    std::size_t seed = 0;
+    for (const auto &elem : v) {
+      symmetric_hash_combine(seed, elem);
+    }
+    return seed;
+  }
+};
+
+/**
+ * @brief Necessary for KeyEquals template parameter of unordered_set and
+ * unordered_map.
+ *
+ */
+template <typename T>
+struct symmetric_vector_equal {
+  bool operator()(const std::vector<T> &v1, const std::vector<T> &v2) const {
+
+    if (v1.size() != v2.size())
+      return false;
+
+    std::unordered_map<T, std::size_t> counts;
+    for (const auto &x : v1) {
+      counts[x]++;
+    }
+    for (const auto &y : v2) {
+      if (!counts.contains(y)) {
+        return false;
+      } else {
+        counts[y]--;
+        if (counts[y] == 0)
+          counts.erase(y);
+      }
+    }
+    return true;
+  }
+};
+
+/**
+ * @brief Permutation-invariant hash function for an std::array
+ */
+template <typename T, std::size_t N>
+struct symmetric_array_hash {
+  std::size_t operator()(const std::array<T, N> &a) const {
+    std::size_t seed = 0;
+    for (const auto &elem : a) {
+      symmetric_hash_combine(seed, elem);
+    }
+    return seed;
+  }
+};
+
+/**
+ * @brief Necessary for KeyEquals template parameter of unordered_set and
+ * unordered_map.
+ *
+ */
+template <typename T, std::size_t N>
+struct symmetric_array_equal {
+  bool operator()(const std::array<T, N> &a1,
+                  const std::array<T, N> &a2) const {
+
+    std::unordered_map<T, std::size_t> counts;
+    for (const auto &x : a1) {
+      counts[x]++;
+    }
+    for (const auto &y : a2) {
+      if (!counts.contains(y)) {
+        return false;
+      } else {
+        counts[y]--;
+        if (counts[y] == 0)
+          counts.erase(y);
+      }
+    }
+    return true;
   }
 };
 
