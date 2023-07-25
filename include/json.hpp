@@ -139,6 +139,49 @@ public:
   }
 
   /**
+   * Just append to file without parsing to check for validity first.
+   */
+  void unsafe_append_to_file(const std::string &filename) {
+
+    if (!std::filesystem::exists(filename)) {
+
+      Json json;
+      json.value_.emplace<JsonArray>();
+      std::get<JsonArray>(json.value_).push_back(*this);
+
+      std::ofstream outfilestream(filename, std::ios_base::app);
+      outfilestream << json.dump();
+      outfilestream.close();
+    } else {
+      // Look for last occurrence of "]" in file, replace it with ",". Also,
+      // read file in reverse for better performance.
+      std::fstream filestream(filename,
+                              std::ios_base::binary | std::ios_base::ate |
+                                  std::ios_base::in | std::ios_base::out);
+
+      for (long long i = filestream.tellg(); i >= 0; --i) {
+        filestream.clear();
+
+        filestream.seekg(i, std::ios_base::beg);
+        char c = filestream.peek();
+
+        if (!std::isspace(static_cast<unsigned char>(c))) {
+          if (c == ']') {
+            filestream.seekp(i, std::ios_base::beg);
+            filestream.put(',');
+            break;
+          }
+        }
+      }
+      filestream.close();
+
+      std::ofstream outfilestream(filename, std::ios_base::app);
+      outfilestream << this->dump() << ']';
+      outfilestream.close();
+    }
+  }
+
+  /**
    * Append to a file as a new array element.
    * Only works if either
    * 1. The top-level element of the JSON file is an array, or
@@ -311,12 +354,12 @@ public:
   ValueType value() { return value_; }
 
   /**
-   * Number aware visitor is a visitor that just returns the type, unless it is
-   * a number, in which case it obeys the following rules:
+   * Number aware visitor is a visitor that just returns the type, unless it
+   * is a number, in which case it obeys the following rules:
    * 1. Allow conversion from integral to floating-point types, but not the
    *    other way.
-   * 2. Prevent downconversion but allow upconversion within integral types and
-   *    within floating point types separately.
+   * 2. Prevent downconversion but allow upconversion within integral types
+   * and within floating point types separately.
    */
   template <typename RequestedType>
   struct number_aware_visitor {
