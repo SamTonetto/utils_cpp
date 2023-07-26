@@ -13,12 +13,17 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    compiler: gcc
+    gcc: 13
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Update apt-get
       run: sudo apt-get update
+
+    - name: Update gnu compiler
+      run: 
 
     - name: Install Doxygen
       run: sudo apt-get install doxygen
