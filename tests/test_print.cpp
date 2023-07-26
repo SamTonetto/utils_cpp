@@ -136,13 +136,52 @@ TEST_CASE("test_newline_io_manip") {
     std::stringstream ss;
     ss << utils::prettyprint << v;
 
-    std::cout << ss.str() << std::endl;
-
     CHECK(ss.str() ==
           "[\n  [\n    {0, 1, 2, 3},\n    {0, 2, 3, 5}\n  ],\n  [\n    "
           "{0, 2}\n  ],\n  [\n    {1, 2, 3, 5},\n    {2, 3},\n    {1, 2, 3}\n  "
           "],\n  "
           "[\n    {3},\n    "
           "{}\n  ],\n  []\n]");
+  }
+}
+
+TEST_CASE("test_print_binary") {
+
+  SUBCASE("uint8_t") {
+
+    uint8_t x = static_cast<uint8_t>(1) << 3;
+    uint8_t y = static_cast<uint8_t>(1) << 7;
+
+    CHECK(utils::to_binary_string(x) == "00001000");
+    CHECK(utils::to_binary_string(y) == "10000000");
+  }
+
+  SUBCASE("uint16_t") {
+
+    uint16_t x = static_cast<uint16_t>(1) << 3;
+    uint16_t y = static_cast<uint16_t>(1) << 15;
+
+    CHECK(utils::to_binary_string(x) == "0000000000001000");
+    CHECK(utils::to_binary_string(y) == "1000000000000000");
+  }
+
+  SUBCASE("uint32_t") {
+
+    uint32_t x = static_cast<uint32_t>(1) << 3;
+    uint32_t y = static_cast<uint32_t>(1) << 31;
+
+    CHECK(utils::to_binary_string(x) == "00000000000000000000000000001000");
+    CHECK(utils::to_binary_string(y) == "10000000000000000000000000000000");
+  }
+
+  SUBCASE("uint64_t") {
+
+    uint64_t x = static_cast<uint64_t>(1) << 3;
+    uint64_t y = static_cast<uint64_t>(1) << 63;
+
+    CHECK(utils::to_binary_string(x) ==
+          "0000000000000000000000000000000000000000000000000000000000001000");
+    CHECK(utils::to_binary_string(y) ==
+          "1000000000000000000000000000000000000000000000000000000000000000");
   }
 }

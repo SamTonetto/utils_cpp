@@ -53,6 +53,22 @@ inline std::ostream &tabwidth(std::ostream &os, std::size_t width) {
   return os;
 }
 
+template <typename T>
+std::string to_binary_string(T x) {
+
+  std::size_t nbits = sizeof(T) * 8;
+  std::string result;
+  result.reserve(nbits);
+  for (std::size_t i = 0; i < nbits; ++i) {
+    if (x & (static_cast<T>(1) << (nbits - i - 1))) {
+      result += '1';
+    } else {
+      result += '0';
+    }
+  }
+  return result;
+}
+
 } // namespace utils
 
 // ========= Forward Declarations ===========

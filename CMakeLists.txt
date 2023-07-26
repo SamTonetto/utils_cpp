@@ -11,13 +11,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE OFF) # Enable verbose makefile for debugging
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Create a compile_commands.json for an LSP to use.
 
-if(MSVC)
-    add_compile_options(/W4 /WX)
-else()
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
-endif()
-
-
 if(NOT WIN32)
   string(ASCII 27 Esc)
   set(ColorReset "${Esc}[m")
@@ -37,6 +30,22 @@ if(NOT WIN32)
   set(BoldCyan    "${Esc}[1;36m")
   set(BoldWhite   "${Esc}[1;37m")
 endif()
+
+
+# Code coverage
+option(ENABLE_COVERAGE "Enable coverage reporting" FALSE)
+if(ENABLE_COVERAGE)
+  add_compile_options(-g -O0 -coverage -fprofile-arcs -ftest-coverage)
+endif()
+
+# All warnings, all errors, and warnings as errors.
+if(MSVC)
+    add_compile_options(/W4 /WX)
+else()
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
+
+
 
 # ------ Documentation ------
 find_package(Doxygen)
@@ -95,10 +104,16 @@ target_include_directories(utils_cpp PUBLIC include)
 # ================ End Build utils_cpp ================
 
 
-message(STATUS "utils_cpp -- ${Blue}Descending into demos${ColorReset}")
-add_subdirectory(demos)
-message(STATUS "utils_cpp -- ${Blue}Finished with demos${ColorReset}")
-message(STATUS "utils_cpp -- ${Blue}Descending into tests${ColorReset}")
-add_subdirectory(tests)
-message(STATUS "utils_cpp -- ${Blue}Finished with tests${ColorReset}")
+option(BUILD_DEMOS "Build demos" FALSE)
+option(BUILD_TESTS "Build tests" FALSE)
 
+if(BUILD_DEMOS)
+  message(STATUS "utils_cpp -- ${Blue}Descending into demos${ColorReset}")
+  add_subdirectory(demos)
+  message(STATUS "utils_cpp -- ${Blue}Finished with demos${ColorReset}")
+endif()
+if(BUILD_TESTS)
+  message(STATUS "utils_cpp -- ${Blue}Descending into tests${ColorReset}")
+  add_subdirectory(tests)
+  message(STATUS "utils_cpp -- ${Blue}Finished with tests${ColorReset}")
+endif()
