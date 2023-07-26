@@ -248,7 +248,7 @@ public:
     }
   }
 
-  constexpr bool empty() const {
+  bool empty() const {
     if (is_array()) {
       return std::get<JsonArray>(value_).empty();
     } else if (is_object()) {
@@ -258,13 +258,9 @@ public:
     }
   }
 
-  constexpr bool is_array() const {
-    return std::holds_alternative<JsonArray>(value_);
-  }
-  constexpr bool is_object() const {
-    return std::holds_alternative<JsonObject>(value_);
-  }
-  constexpr bool is_scalar() const { return !is_array() && !is_object(); }
+  bool is_array() const { return std::holds_alternative<JsonArray>(value_); }
+  bool is_object() const { return std::holds_alternative<JsonObject>(value_); }
+  bool is_scalar() const { return !is_array() && !is_object(); }
 
   template <typename T1, typename T2>
   Json(const std::pair<T1, T2> &p) {
@@ -436,7 +432,7 @@ public:
    * Get size of the top-level Json value_. If array, return length, if
    * object, return number of key-val pairs, if scalar, return 1.
    */
-  constexpr std::size_t size() const {
+  std::size_t size() const {
     if (empty()) {
       return 0;
     } else if (is_array()) {
@@ -449,7 +445,7 @@ public:
   }
 
   template <typename... Args>
-  constexpr void emplace_back(Args &&...args) {
+  void emplace_back(Args &&...args) {
     if (this->is_array()) {
       std::get<JsonArray>(value_).emplace_back(std::forward<Args>(args)...);
     } else if (this->empty()) {
@@ -460,7 +456,7 @@ public:
     }
   }
 
-  constexpr void push_back(const Json &json) {
+  void push_back(const Json &json) {
     if (this->is_array()) {
       std::get<JsonArray>(value_).push_back(json);
     } else if (this->empty()) {
@@ -560,10 +556,10 @@ struct json_iterator_wrapper {
 
   JsonIteratorType it;
 
-  constexpr bool is_array_iterator() const {
+  bool is_array_iterator() const {
     return std::holds_alternative<JsonArray::iterator>(it);
   }
-  constexpr bool is_object_iterator() {
+  bool is_object_iterator() {
     return std::holds_alternative<JsonObject::iterator>(it);
   }
 
