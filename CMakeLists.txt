@@ -35,7 +35,11 @@ endif()
 # Code coverage
 option(ENABLE_COVERAGE "Enable coverage reporting" FALSE)
 if(ENABLE_COVERAGE)
-  add_compile_options(-g -O0 -coverage -fprofile-arcs -ftest-coverage)
+  message(STATUS "graphlib_cpp -- ${Green}SUCCESS: Code coverage enabled${ColorReset}")
+  add_compile_options(-O0 -g --coverage)
+  add_link_options(--coverage)
+else()
+  message(STATUS "graphlib_cpp -- ${Yellow}WARNING: Code coverage disabled${ColorReset}")
 endif()
 
 # All warnings, all errors, and warnings as errors.
