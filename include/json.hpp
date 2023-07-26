@@ -479,26 +479,22 @@ public:
 public:
   template <typename T>
   Json &operator=(const T &val) {
-    if constexpr (is_same_container_v<std::vector, T>) {
-      this->value_ = ValueType(JsonArray{});
-      for (const auto &el : val) {
-        std::get<JsonArray>(this->value_).push_back(Json(el));
-      }
-    } else if constexpr (is_same_container_v<std::pair, T>) {
-      this->value_ = ValueType(JsonArray{});
-      std::get<JsonArray>(this->value_).push_back(Json(val.first));
-      std::get<JsonArray>(this->value_).push_back(Json(val.second));
-    } else if constexpr (is_same_container_v<std::map, T>) {
-      this->value_ = ValueType(JsonObject{});
-      for (const auto &[key, v] : val) {
-        std::get<JsonObject>(this->value_)[key] = Json(v);
-      }
-    } else if constexpr (is_same_container_v<std::unordered_map, T>) {
-      this->value_ = ValueType(JsonObject{});
-      for (const auto &[key, v] : val) {
-        std::get<JsonObject>(this->value_)[key] = Json(v);
-      }
+    if constexpr (is_instantiation<std::vector, T>() ||
+                  is_instantiation<std::array, T>()) {
+
+      this->value_.emplace<JsonArray>(val.begin(), val.end());
+
+    } else if constexpr (is_instantiation<std::pair, T>()) {
+
+      this->value_.emplace<JsonArray>(val.first, val.second);
+
+    } else if constexpr (is_instantiation<std::unordered_map, T>() ||
+                         is_instantiation<std::map, T>()) {
+
+      this->value_.emplace<JsonObject>(val.begin(), val.end());
+
     } else {
+
       this->value_ = ValueType(val);
     }
     return *this;
