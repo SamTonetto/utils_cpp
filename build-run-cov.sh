@@ -11,6 +11,9 @@
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuxo pipefail
 
+# Because for some reason lcov --remove doesn't work well with relative paths
+BASE_DIR=$(pwd)
+
 if [ -z "${TC}" ]; then
     echo "Error: TC (toolchain) variable is not set. Please specify 'gcc' or 'clang'."
     echo "Example: TC=gcc ./build-run-cov.sh"
@@ -35,11 +38,8 @@ elif [ "${TC}" = "gcc" ]; then
     # Exclude system files.
     lcov --remove gcc-coverage.info '/usr/*' '/opt/*' --output-file gcc-coverage.info
 
-    # Exclude external/ folder - github actions
-    lcov --remove gcc-coverage.info '/home/runner/work/utils_cpp/utils_cpp/gcc-build/external/*' --output-file gcc-coverage.info
-
-    # Exclude external/ folder - local
-    lcov --remove gcc-coverage.info 'external/*' -- output-file gcc-coverage.info
+    # Exclude external/ folder
+    lcov --remove gcc-coverage.info "$BASE_DIR/external/*" --output-file gcc-coverage.info
 
     cd ..
 
@@ -65,10 +65,13 @@ elif [ "${TC}" = "clang" ]; then
     lcov --remove clang-coverage.info '/usr/*' '/opt/*' --output-file clang-coverage.info
 
     # Exclude external/ folder - github actions
-    lcov --remove gcc-coverage.info '/home/runner/work/utils_cpp/utils_cpp/gcc-build/external/*' --output-file gcc-coverage.info
+#    lcov --remove gcc-coverage.info '/home/runner/work/utils_cpp/utils_cpp/external/*' --output-file gcc-coverage.info
 
     # Exclude external/ folder - local
-    lcov --remove gcc-coverage.info 'external/*' -- output-file gcc-coverage.info
+    lcov --remove gcc-coverage.info '../external/*' -- output-file gcc-coverage.info
+
+    # Exclude external/ folder
+    lcov --remove gcc-coverage.info "$BASE_DIR/external/*" --output-file gcc-coverage.info
 
     cd ..
 
