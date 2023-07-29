@@ -1,5 +1,7 @@
 ![Tests](https://github.com/samtonetto/utils_cpp/actions/workflows/tests.yml/badge.svg)
 
+[![codecov](https://codecov.io/gh/SamTonetto/utils_cpp/branch/main/graph/badge.svg?token=ZYM5TU5WJB)](https://codecov.io/gh/SamTonetto/utils_cpp)
+
 # utils_cpp
 
 Custom convenience utilities with minimal reliance on external libraries.
