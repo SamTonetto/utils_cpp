@@ -32,8 +32,14 @@ elif [ "${TC}" = "gcc" ]; then
     # Create coverage report - lcov must be installed.
     lcov --directory . --capture --output-file gcc-coverage.info --gcov-tool $COV
 
-    # Exclude system files from report.
-    lcov --remove gcc-coverage.info '/usr/*' '/opt/*' 'external/*' --output-file gcc-coverage.info
+    # Exclude system files.
+    lcov --remove gcc-coverage.info '/usr/*' '/opt/*' --output-file gcc-coverage.info
+
+    # Exclude external/ folder - github actions
+    lcov --remove gcc-coverage.info '/home/runner/work/utils_cpp/utils_cpp/gcc-build/external/*' --output-file gcc-coverage.info
+
+    # Exclude external/ folder - local
+    lcov --remove gcc-coverage.info 'external/*' -- output-file gcc-coverage.info
 
     cd ..
 
@@ -56,7 +62,13 @@ elif [ "${TC}" = "clang" ]; then
     lcov --directory . --capture --output-file clang-coverage.info --gcov-tool $COV
 
     # Exclude system files from report.
-    lcov --remove clang-coverage.info '/usr/*' '/opt/*' 'external/*' --output-file clang-coverage.info
+    lcov --remove clang-coverage.info '/usr/*' '/opt/*' --output-file clang-coverage.info
+
+    # Exclude external/ folder - github actions
+    lcov --remove gcc-coverage.info '/home/runner/work/utils_cpp/utils_cpp/gcc-build/external/*' --output-file gcc-coverage.info
+
+    # Exclude external/ folder - local
+    lcov --remove gcc-coverage.info 'external/*' -- output-file gcc-coverage.info
 
     cd ..
 
