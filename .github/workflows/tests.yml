@@ -44,12 +44,12 @@ jobs:
 
 
     # gcc
-    - name: Run build/run/test/coverage script
-      run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
+    # - name: Run build/run/test/coverage script
+    #   run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
 
     # clang
-    # - name: Run build/run/test/coverage script
-    # run: TC=clang ${{github.workspace}}/./build-run-cov.sh
+    - name: Run build/run/test/coverage script
+      run: TC=clang ${{github.workspace}}/./build-run-cov.sh
 
 
     # ====================
