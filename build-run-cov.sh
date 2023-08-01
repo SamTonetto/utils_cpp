@@ -36,7 +36,7 @@ elif [ "${TC}" = "clang" ]; then
     
     # reference: https://stackoverflow.com/questions/50613601/getting-llvm-cov-to-talk-to-codecov-io
 
-    LLVM_PROFILE_FILE="coverage/%p.profraw" ctest
+    LLVM_PROFILE_FILE="coverage/%p.profraw" ctest --rerun-failed --output-on-failure
 
     # Merge coverage files
     llvm-profdata merge -sparse coverage/*.profraw -o coverage/coverage.profdata
@@ -59,7 +59,7 @@ elif [ "${TC}" = "gcc" ]; then
     cmake --preset gcc-build
     cmake --build --preset gcc-build -j4
     cd gcc-build/
-    ctest
+    ctest --rerun-failed --output-on-failure
 
     # Create coverage report - lcov must be installed.
     lcov --directory . --capture --output-file gcc-coverage.info --gcov-tool $COV
