@@ -28,14 +28,8 @@ jobs:
       run: sudo apt-get install -y g++-13 cmake lcov doxygen
 
     - name: Install latest llvm
-      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 16
+      run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 17
 
-      
-    - name: Make sure clang++ is set properly
-      run: sudo ln -s /usr/bin/clang-16 /usr/bin/clang && sudo ln -s /usr/bin/clang++-16 /usr/bin/clang++
-      
-
-      
     # ================================
     # Build/run/test/coverage
     # ================================
