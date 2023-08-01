@@ -46,27 +46,27 @@ std::string join(const std::vector<std::string> &strings,
   return result;
 }
 
-bool convertible_to_double(const std::string &s) {
+bool convertible_to_long_double(const std::string &s) {
   // no extraneous leading zeros
   if ((s.size() > 1 && s[0] == '0' && s[1] != '.') ||
       (s.size() > 2 && s[0] == '-' && s[1] == '0' && s[1] != '.'))
     return false;
 
   std::istringstream iss(s);
-  double d;
-  iss >> std::noskipws >> d;
+  long double num;
+  iss >> std::noskipws >> num;
   return iss.eof() && !iss.fail();
 }
 
-bool convertible_to_int(const std::string &s) {
+bool convertible_to_long_long(const std::string &s) {
 
   if ((s.size() > 1 && s[0] == '0') ||
       (s.size() > 2 && s[0] == '-' && s[1] == '0'))
     return false;
 
   std::istringstream iss(s);
-  int d;
-  iss >> std::noskipws >> d;
+  long long num;
+  iss >> std::noskipws >> num;
   return iss.eof() && !iss.fail();
 }
 

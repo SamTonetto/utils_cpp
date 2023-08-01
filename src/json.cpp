@@ -52,6 +52,50 @@ std::string prettify(std::string_view json_str) {
   return json.pretty_dump();
 }
 
+void wrap_in_object(const std::string &filename, const std::string &key) {
+
+  if (!std::filesystem::exists(filename)) {
+    return;
+  }
+
+  std::ifstream f(filename, std::ios_base::binary);
+  if (f.peek() == std::ifstream::traits_type::eof()) {
+    return; // empty file
+  }
+
+  std::stringstream buffer;
+  buffer << f.rdbuf();
+  f.close();
+
+  std::string out = "{\"" + key + "\":" + buffer.str() + "}";
+
+  std::ofstream of(filename, std::ios_base::binary);
+  of << out;
+  of.close();
+}
+
+void wrap_in_array(const std::string &filename) {
+
+  if (!std::filesystem::exists(filename)) {
+    return;
+  }
+
+  std::ifstream f(filename, std::ios_base::binary);
+  if (f.peek() == std::ifstream::traits_type::eof()) {
+    return; // empty file
+  }
+
+  std::stringstream buffer;
+  buffer << f.rdbuf();
+  f.close();
+
+  std::string out = "[" + buffer.str() + "]";
+
+  std::ofstream of(filename, std::ios_base::binary);
+  of << out;
+  of.close();
+}
+
 std::string minify(std::string_view json_str) {
 
   std::string minified;
@@ -82,7 +126,7 @@ std::string Json::dump() const {
   return ss.str();
 }
 
-std::string Json::pretty_dump(int tab_size) const {
+std::string Json::pretty_dump(std::size_t tab_size) const {
   std::stringstream ss;
   pretty_dump(ss, tab_size);
   return ss.str();
@@ -97,49 +141,31 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
           ss << "null";
         } else if constexpr (std::is_same_v<T, JsonBool>) {
           ss << std::boolalpha << arg;
-        } else if constexpr (std::is_same_v<T, JsonChar> ||
-                             std::is_same_v<T, JsonUChar> ||
-                             std::is_same_v<T, JsonShort> ||
-                             std::is_same_v<T, JsonUShort> ||
-                             std::is_same_v<T, JsonInt> ||
-                             std::is_same_v<T, JsonUInt> ||
-                             std::is_same_v<T, JsonLong> ||
-                             std::is_same_v<T, JsonULong> ||
-                             std::is_same_v<T, JsonLongLong> ||
-                             std::is_same_v<T, JsonULongLong>) {
-          ss << arg;
-        } else if constexpr (std::is_same_v<T, JsonFloat>) {
-          ss << std::setprecision(std::numeric_limits<JsonFloat>::max_digits10)
-             << arg;
-        } else if constexpr (std::is_same_v<T, JsonDouble>) {
-          ss << std::setprecision(std::numeric_limits<JsonDouble>::max_digits10)
-             << arg;
-        } else if constexpr (std::is_same_v<T, JsonLongDouble>) {
-          ss << std::setprecision(
-                    std::numeric_limits<JsonLongDouble>::max_digits10)
+        } else if constexpr (std::is_same_v<T, JsonNumber>) {
+          ss << std::setprecision(std::numeric_limits<JsonNumber>::max_digits10)
              << arg;
         } else if constexpr (std::is_same_v<T, JsonString>) {
           ss << "\"" << arg << "\"";
         } else if constexpr (std::is_same_v<T, JsonArray>) {
           ss << '[';
-          int index = 0;
+          std::size_t index = 0;
           for (const auto &el : arg) {
             el.dump(ss);
-            if (index < static_cast<int>(arg.size()) - 1) {
+            if (index + 1 < arg.size()) {
               ss << ',';
             }
-            index++;
+            ++index;
           }
           ss << ']';
         } else if constexpr (std::is_same_v<T, JsonObject>) {
           ss << '{';
-          int index = 0;
+          std::size_t index = 0;
           for (const auto &[key, val] : arg) {
             ss << "\"" << key << "\":" << val.dump();
-            if (index < static_cast<int>(arg.size()) - 1) {
+            if (index + 1 < arg.size()) {
               ss << ',';
             }
-            index++;
+            ++index;
           }
           ss << '}';
         } else {
@@ -150,8 +176,9 @@ std::stringstream &Json::dump(std::stringstream &ss) const {
       value_);
 }
 
-std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
-                                     int current_offset) const {
+std::stringstream &Json::pretty_dump(std::stringstream &ss,
+                                     std::size_t tab_size,
+                                     std::size_t current_offset) const {
   return std::visit(
       [&ss, tab_size, current_offset](auto &&arg) -> std::stringstream & {
         using T = std::decay_t<decltype(arg)>;
@@ -160,40 +187,22 @@ std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
           ss << "null";
         } else if constexpr (std::is_same_v<T, JsonBool>) {
           ss << std::boolalpha << arg;
-        } else if constexpr (std::is_same_v<T, JsonChar> ||
-                             std::is_same_v<T, JsonUChar> ||
-                             std::is_same_v<T, JsonShort> ||
-                             std::is_same_v<T, JsonUShort> ||
-                             std::is_same_v<T, JsonInt> ||
-                             std::is_same_v<T, JsonUInt> ||
-                             std::is_same_v<T, JsonLong> ||
-                             std::is_same_v<T, JsonULong> ||
-                             std::is_same_v<T, JsonLongLong> ||
-                             std::is_same_v<T, JsonULongLong>) {
-          ss << arg;
-        } else if constexpr (std::is_same_v<T, JsonFloat>) {
-          ss << std::setprecision(std::numeric_limits<JsonFloat>::max_digits10)
-             << arg;
-        } else if constexpr (std::is_same_v<T, JsonDouble>) {
-          ss << std::setprecision(std::numeric_limits<JsonDouble>::max_digits10)
-             << arg;
-        } else if constexpr (std::is_same_v<T, JsonLongDouble>) {
-          ss << std::setprecision(
-                    std::numeric_limits<JsonLongDouble>::max_digits10)
+        } else if constexpr (std::is_same_v<T, JsonNumber>) {
+          ss << std::setprecision(std::numeric_limits<JsonNumber>::max_digits10)
              << arg;
         } else if constexpr (std::is_same_v<T, JsonString>) {
           ss << "\"" << arg << "\"";
         } else if constexpr (std::is_same_v<T, JsonArray>) {
           ss << "[\n";
-          int index = 0;
+          std::size_t index = 0;
           for (const auto &el : arg) {
             ss << std::string(current_offset + tab_size, ' ');
             el.pretty_dump(ss, tab_size, current_offset + tab_size);
 
-            if (index < static_cast<int>(arg.size()) - 1) {
+            if (index + 1 < arg.size()) {
               ss << ',';
             }
-            if (index < static_cast<int>(arg.size())) {
+            if (index < arg.size()) {
               ss << '\n';
             }
             index++;
@@ -201,16 +210,16 @@ std::stringstream &Json::pretty_dump(std::stringstream &ss, int tab_size,
           ss << std::string(current_offset, ' ') << ']';
         } else if constexpr (std::is_same_v<T, JsonObject>) {
           ss << "{\n";
-          int index = 0;
+          std::size_t index = 0;
           for (const auto &[key, val] : arg) {
             ss << std::string(current_offset + tab_size, ' ') << "\"" << key
                << "\": ";
 
             val.pretty_dump(ss, tab_size, current_offset + tab_size);
-            if (index < static_cast<int>(arg.size()) - 1) {
+            if (index + 1 < arg.size()) {
               ss << ',';
             }
-            if (index < static_cast<int>(arg.size())) {
+            if (index < arg.size()) {
               ss << '\n';
             }
             index++;
@@ -255,7 +264,9 @@ void JsonParser::ObjKey::handle(JsonParser &p) {
   char c = p.minified[p.index];
 
   if (c == '}') {
+
     p.index += p.handle_closing_parenthesis();
+
   } else {
 
     std::string key = p.gather_string(p.index);
@@ -394,7 +405,9 @@ std::size_t JsonParser::handle_scalar() {
 
   char c = minified[index];
 
-  if (c == '"') { // string
+  if (c == '"') {
+
+    // STRING
 
     std::string s = gather_string(index);
     stack.top().get().value_ = JsonString{s};
@@ -417,16 +430,15 @@ std::size_t JsonParser::handle_scalar() {
 
   } else {
 
-    std::string s;
     std::size_t i = index;
     while (i < minified.size() && minified[i] != ',' && minified[i] != '}' &&
            minified[i] != ']') {
-      s += minified[i];
       ++i;
     }
+    std::string s = minified.substr(index, i - index);
 
-    if (convertible_to_double(s)) {
-      emplace_top<JsonDouble>(std::stod(s));
+    if (convertible_to_long_double(s)) {
+      emplace_top<JsonNumber>(std::stold(s));
       return i - index;
     } else {
       throw std::runtime_error("Invalid scalar");

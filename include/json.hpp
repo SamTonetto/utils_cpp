@@ -30,27 +30,18 @@ class JsonParser;
 
 using JsonNull = std::nullptr_t;
 using JsonBool = bool;
-
-// Standard integer types
-using JsonChar = signed char;
-using JsonUChar = unsigned char;
-using JsonShort = short int;
-using JsonUShort = unsigned short int;
-using JsonInt = int;
-using JsonUInt = unsigned int;
-using JsonLong = long int;
-using JsonULong = unsigned long int;
-using JsonLongLong = long long int;
-using JsonULongLong = unsigned long long int;
-
-// Standard floating point types
-using JsonFloat = float;
-using JsonDouble = double;
-using JsonLongDouble = long double;
-
 using JsonString = std::string;
 using JsonArray = std::vector<Json>;
 using JsonObject = std::map<JsonString, Json>;
+
+/* Json does not distinguish different types of numbers, and there are no
+ * limits on number size. We will simply use long double to store all JSON
+ * representations of numbers. A "double" has 64-bits and is able to represent
+ * any integer from -2^53 to 2^53 exactly, meanwhile a "long double" is
+ * 128-bits. So it is only in very pathological cases where accuracy will be
+ * lost.
+ */
+using JsonNumber = long double;
 
 /**
  * Parse a string formatted as JSON.
@@ -75,6 +66,27 @@ std::string minify(std::string_view json_str);
  */
 std::string prettify(std::string_view json_str);
 
+/**
+ * Wrap a JSON file's contents in a top-level object with a string key,
+ * defaulting to "data".
+ *
+ * Does nothing if file doesn't exist or is empty.
+ * Doesn't parse file for validity, just loads it as a string and wraps it in an
+ * object.
+ */
+void wrap_in_object(const std::string &filename,
+                    const std::string &key = "data");
+
+/**
+ * Wrap a JSON file's contents in a top-level array with a string key,
+ * defaulting to "data".
+ *
+ * Does nothing if file doesn't exist or is empty.
+ * Doesn't parse file for validity, just loads it as a string and wraps it in an
+ * array.
+ */
+void wrap_in_array(const std::string &filename);
+
 struct json_iterator_wrapper;
 struct json_iterator_value;
 
@@ -87,37 +99,44 @@ class Json {
 private:
   friend JsonParser;
 
-  using ValueType =
-      std::variant<JsonObject, JsonArray, JsonNull, JsonBool, JsonChar,
-                   JsonUChar, JsonShort, JsonUShort, JsonInt, JsonUInt,
-                   JsonLong, JsonULong, JsonLongLong, JsonULongLong, JsonFloat,
-                   JsonDouble, JsonLongDouble, JsonString>;
+  using ValueType = std::variant<JsonObject, JsonArray, JsonNull, JsonBool,
+                                 JsonNumber, JsonString>;
 
   ValueType value_;
 
 public:
   Json() : value_{JsonObject{}} {}
 
-  constexpr Json(const JsonString &value) : value_{value} {}
-  constexpr Json(JsonBool value) : value_{value} {}
+  Json(std::string_view value) : value_{std::string(value)} {}
+  constexpr Json(bool value) : value_{value} {}
 
-  constexpr Json(JsonChar value) : value_{value} {}
-  constexpr Json(JsonUChar value) : value_{value} {}
-  constexpr Json(JsonShort value) : value_{value} {}
-  constexpr Json(JsonUShort value) : value_{value} {}
-  constexpr Json(JsonInt value) : value_{value} {}
-  constexpr Json(JsonUInt value) : value_{value} {}
-  constexpr Json(JsonLong value) : value_{value} {}
-  constexpr Json(JsonULong value) : value_{value} {}
-  constexpr Json(JsonLongLong value) : value_{value} {}
-  constexpr Json(JsonULongLong value) : value_{value} {}
+  constexpr Json(unsigned char value)
+      : value_{static_cast<JsonNumber>(value)} {}
+  constexpr Json(char value) : value_{static_cast<JsonNumber>(value)} {}
 
-  constexpr Json(JsonFloat value) : value_{value} {}
-  constexpr Json(JsonDouble value) : value_{value} {}
-  constexpr Json(JsonLongDouble value) : value_{value} {}
+  constexpr Json(unsigned short value)
+      : value_{static_cast<JsonNumber>(value)} {}
+  constexpr Json(short value) : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(unsigned int value) : value_{static_cast<JsonNumber>(value)} {}
+  constexpr Json(int value) : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(unsigned long value)
+      : value_{static_cast<JsonNumber>(value)} {}
+  constexpr Json(long value) : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(unsigned long long value)
+      : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(long long value) : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(float value) : value_{static_cast<JsonNumber>(value)} {}
+  constexpr Json(double value) : value_{static_cast<JsonNumber>(value)} {}
+
+  constexpr Json(long double value) : value_{value} {}
 
   std::string dump() const;
-  std::string pretty_dump(int tab_size = 2) const;
+  std::string pretty_dump(std::size_t tab_size = 2) const;
 
   /**
    * Write to file, overwriting anything existing.
@@ -139,7 +158,9 @@ public:
   }
 
   /**
-   * Just append to file without parsing to check for validity first.
+   * Performs the function of `append_to_file`, but without parsing first to
+   * check the validity of the file - to be valid the file must basically have
+   * an array as the top-level element.
    */
   void unsafe_append_to_file(const std::string &filename) {
 
@@ -220,7 +241,9 @@ public:
                                 std::ios_base::binary | std::ios_base::ate |
                                     std::ios_base::in | std::ios_base::out);
 
-        for (long long i = filestream.tellg(); i >= 0; --i) {
+        for (long long i = static_cast<long long>(filestream.tellg()); i >= 0;
+             --i) {
+
           filestream.clear();
 
           filestream.seekg(i, std::ios_base::beg);
@@ -264,10 +287,7 @@ public:
 
   template <typename T1, typename T2>
   Json(const std::pair<T1, T2> &p) {
-    JsonArray arr;
-    arr.push_back(Json(p.first));
-    arr.push_back(Json(p.second));
-    this->value_ = arr;
+    this->value_.emplace<JsonArray>(p.first, p.second);
   }
 
   template <typename K, typename V>
@@ -307,15 +327,10 @@ public:
 
   template <typename T>
   Json(const std::vector<T> &value) {
-
-    JsonArray arr;
-    for (const auto &el : value) {
-      arr.push_back(Json(el));
-    }
-    this->value_ = arr;
+    this->value_.emplace<JsonArray>(value.begin(), value.end());
   }
 
-  Json &operator[](const JsonString &key) {
+  Json &operator[](const std::string &key) {
 
     if (this->is_object()) {
       if (!std::get<JsonObject>(value_).contains(key)) {
@@ -338,11 +353,11 @@ public:
     return std::get<JsonObject>(value_).at(key);
   }
 
-  Json &operator[](const JsonULongLong &index) {
+  Json &operator[](const std::size_t &index) {
     return std::get<JsonArray>(value_)[index];
   }
 
-  const Json &operator[](const JsonULongLong &index) const {
+  const Json &operator[](const std::size_t &index) const {
     return std::get<JsonArray>(value_)[index];
   }
 
@@ -350,45 +365,11 @@ public:
   ValueType value() { return value_; }
 
   /**
-   * Number aware visitor is a visitor that just returns the type, unless it
-   * is a number, in which case it obeys the following rules:
-   * 1. Allow conversion from integral to floating-point types, but not the
-   *    other way.
-   * 2. Prevent downconversion but allow upconversion within integral types
-   * and within floating point types separately.
-   */
-  template <typename RequestedType>
-  struct number_aware_visitor {
-
-    template <typename StoredType>
-    RequestedType operator()(const StoredType &u) const {
-      if constexpr (std::is_arithmetic_v<RequestedType> &&
-                    std::is_arithmetic_v<StoredType>) {
-        if (std::is_integral_v<RequestedType> &&
-            std::is_floating_point_v<StoredType>) {
-          throw std::runtime_error(
-              "Invalid conversion, precision would be lost due to "
-              "integral/floating-point cross-conversion");
-        } else if constexpr (sizeof(RequestedType) < sizeof(StoredType)) {
-          throw std::runtime_error("Invalid conversion, precision would be "
-                                   "lost due to downconversion");
-        } else {
-          return static_cast<RequestedType>(u);
-        }
-      } else if constexpr (std::is_same_v<RequestedType, StoredType>) {
-        return static_cast<StoredType>(u);
-      } else {
-        throw std::runtime_error("Unable to extract type");
-      }
-    }
-  };
-
-  /**
    * Number-aware getting.
    */
   template <typename T>
   T get() const {
-    return std::visit(number_aware_visitor<T>{}, value_);
+    return std::get<T>(value_);
   }
 
   template <typename T>
@@ -489,9 +470,21 @@ public:
 
       this->value_.emplace<JsonObject>(val.begin(), val.end());
 
-    } else {
+    } else if constexpr (std::is_same_v<T, bool>) {
 
-      this->value_ = ValueType(val);
+      this->value_.emplace<JsonBool>(val);
+
+    } else if constexpr (std::is_same_v<T, std::nullptr_t>) {
+
+      this->value_.emplace<JsonNull>();
+
+    } else if constexpr (std::is_arithmetic_v<T>) {
+
+      this->value_.emplace<JsonNumber>(static_cast<JsonNumber>(val));
+
+    } else { // string
+
+      this->value_.emplace<JsonString>(val);
     }
     return *this;
   }
@@ -499,8 +492,9 @@ public:
 private:
   std::stringstream &dump(std::stringstream &ss) const;
 
-  std::stringstream &pretty_dump(std::stringstream &ss, int tab_size = 2,
-                                 int current_offset = 0) const;
+  std::stringstream &pretty_dump(std::stringstream &ss,
+                                 std::size_t tab_size = 2,
+                                 std::size_t current_offset = 0) const;
 };
 
 // ========== ITERATORS ============

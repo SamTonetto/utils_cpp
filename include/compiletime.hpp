@@ -96,6 +96,6 @@ constexpr bool is_stl_container() {
          is_instantiation<std::stack, T>() ||
          is_instantiation<std::queue, T>() ||
          is_instantiation<std::priority_queue, T>();
-};
+}
 
 } // namespace utils
