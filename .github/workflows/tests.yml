@@ -25,7 +25,7 @@ jobs:
       run: sudo apt-get update
 
     - name: Update and install
-      run: sudo apt-get install -y g++-13 llvm cmake lcov doxygen
+      run: sudo apt-get install -y g++-13 clang++-16 cmake lcov doxygen
 
       
     # ================================

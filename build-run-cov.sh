@@ -23,8 +23,8 @@ if [ -z "${TC}" ]; then
     exit 1
 
 elif [ "${TC}" = "clang" ]; then
-    export CC="clang"
-    export CXX="clang++"
+    export CC="clang-16"
+    export CXX="clang++-16"
 
     if [ -d "build" ]; then
 	rm -r "build"
