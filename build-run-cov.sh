@@ -39,10 +39,10 @@ elif [ "${TC}" = "clang" ]; then
     LLVM_PROFILE_FILE="coverage/%p.profraw" ctest --rerun-failed --output-on-failure
 
     # Merge coverage files
-    llvm-profdata merge -sparse coverage/*.profraw -o coverage/coverage.profdata
+    llvm-profdata-16 merge -sparse coverage/*.profraw -o coverage/coverage.profdata
 
     # Generate coverage report
-    llvm-cov export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
+    llvm-cov-16 export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
 
     cd ../../
 
