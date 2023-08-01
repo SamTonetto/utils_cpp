@@ -25,7 +25,11 @@ jobs:
       run: sudo apt-get update
 
     - name: Update and install
-      run: sudo apt-get install -y g++-13 clang++-16 cmake lcov doxygen
+      run: sudo apt-get install -y g++-13 llvm clang-16 cmake lcov doxygen
+
+    - name: Make sure clang++ is set properly
+      run: sudo ln -s /usr/bin/clang-16 /usr/bin/clang && sudo ln -s /usr/bin/clang++-16 /usr/bin/clang++
+      
 
       
     # ================================
