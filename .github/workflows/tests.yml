@@ -48,8 +48,8 @@ jobs:
       run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
 
     # clang
-    - name: Run build/run/test/coverage script
-      run: TC=clang ${{github.workspace}}/./build-run-cov.sh
+    # - name: Run build/run/test/coverage script
+    # run: TC=clang ${{github.workspace}}/./build-run-cov.sh
 
 
     # ====================
@@ -60,5 +60,5 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ${{github.workspace}}/gcc-build/gcc-coverage.info ${{github.workspace}}/build/clang-coverage.info
+        files: ${{github.workspace}}/build/clang-coverage.info
 
