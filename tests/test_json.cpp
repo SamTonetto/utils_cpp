@@ -121,7 +121,7 @@ TEST_CASE("parse number") {
 
   std::string s3 = "42";
   auto json = utils::parse(s3);
-  CHECK(std::get<long double>(json.value()) == 42);
+  CHECK(std::get<double>(json.value()) == 42);
 
   CHECK(json.is_scalar());
   CHECK_FALSE(json.is_object());
@@ -134,10 +134,10 @@ TEST_CASE("parse array") {
   auto json = utils::parse(s4);
   CHECK(std::get<bool>(json[0].value()) == true);
   CHECK(std::get<bool>(json[1].value()) == false);
-  CHECK(std::get<long double>(json[2].value()) == 42);
-  CHECK(std::get<long double>(json[3][0].value()) == 1);
-  CHECK(std::get<long double>(json[3][1].value()) == 2);
-  CHECK(std::get<long double>(json[3][2].value()) == 3);
+  CHECK(std::get<double>(json[2].value()) == 42);
+  CHECK(std::get<double>(json[3][0].value()) == 1);
+  CHECK(std::get<double>(json[3][1].value()) == 2);
+  CHECK(std::get<double>(json[3][2].value()) == 3);
 
   CHECK(json.is_array());
   CHECK_FALSE(json.is_object());
@@ -151,11 +151,11 @@ TEST_CASE("test parse again ") {
 
   auto json = utils::parse(json_string);
 
-  CHECK(std::get<long double>(json["key1"][0].value()) == 1);
-  CHECK(json["key1"][0].get<long double>() == 1);
+  CHECK(std::get<double>(json["key1"][0].value()) == 1);
+  CHECK(json["key1"][0].get<double>() == 1);
 
-  CHECK(std::get<long double>(json["key1"][1].value()) == 2);
-  CHECK(json["key1"][1].get<long double>() == 2);
+  CHECK(std::get<double>(json["key1"][1].value()) == 2);
+  CHECK(json["key1"][1].get<double>() == 2);
 
   CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
   CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
@@ -173,11 +173,11 @@ TEST_CASE("test parse file") {
 
   auto json = utils::parse_file("temporary_test_file.json");
 
-  CHECK(std::get<long double>(json["key1"][0].value()) == 1);
-  CHECK(json["key1"][0].get<long double>() == 1);
+  CHECK(std::get<double>(json["key1"][0].value()) == 1);
+  CHECK(json["key1"][0].get<double>() == 1);
 
-  CHECK(std::get<long double>(json["key1"][1].value()) == 2);
-  CHECK(json["key1"][1].get<long double>() == 2);
+  CHECK(std::get<double>(json["key1"][1].value()) == 2);
+  CHECK(json["key1"][1].get<double>() == 2);
 
   CHECK(std::get<std::string>(json["key2"][0]["key3"].value()) == "val");
   CHECK(json["key2"][0]["key3"].get<std::string>() == "val");
@@ -288,9 +288,9 @@ TEST_CASE("get array") {
   std::string json_string = "{\"key\": [0,1,2,3,4,0.5]}";
   utils::Json json = utils::parse(json_string);
 
-  std::vector<long double> v = json["key"].get_array<long double>();
+  std::vector<double> v = json["key"].get_array<double>();
 
-  CHECK(v == std::vector<long double>({0, 1, 2, 3, 4, 0.5}));
+  CHECK(v == std::vector<double>({0, 1, 2, 3, 4, 0.5}));
 }
 
 TEST_CASE("get map and umap") {
@@ -298,17 +298,17 @@ TEST_CASE("get map and umap") {
   utils::Json json = utils::parse(json_string);
 
   SUBCASE("map") {
-    std::map<std::string, long double> result = json.get_map<long double>();
+    std::map<std::string, double> result = json.get_map<double>();
 
-    CHECK(result == std::map<std::string, long double>{
-                        {"key1", 1}, {"key2", 2}, {"key3", 3}});
+    CHECK(result ==
+          std::map<std::string, double>{{"key1", 1}, {"key2", 2}, {"key3", 3}});
   }
 
   SUBCASE("unordered_map") {
-    std::unordered_map<std::string, long double> result =
-        json.get_unordered_map<long double>();
+    std::unordered_map<std::string, double> result =
+        json.get_unordered_map<double>();
 
-    CHECK(result == std::unordered_map<std::string, long double>{
+    CHECK(result == std::unordered_map<std::string, double>{
                         {"key1", 1}, {"key2", 2}, {"key3", 3}});
   }
 }
@@ -320,7 +320,7 @@ TEST_CASE("array and obj iteration") {
 
   utils::Json json = utils::parse(json_string);
 
-  std::vector<std::map<std::string, std::vector<long double>>>
+  std::vector<std::map<std::string, std::vector<double>>>
       encoded_data_structure;
 
   // Note: Could also just use for(auto array_entry : json)
@@ -331,13 +331,13 @@ TEST_CASE("array and obj iteration") {
     for (utils::json_iterator_value map_entry : array_entry.value()) {
 
       std::string key = map_entry.key(); // keys are always strings for JSON.
-      auto val = map_entry.value().get_array<long double>();
+      auto val = map_entry.value().get_array<double>();
 
       encoded_data_structure.back()[key] = val;
     }
   }
 
-  std::vector<std::map<std::string, std::vector<long double>>> correct(2);
+  std::vector<std::map<std::string, std::vector<double>>> correct(2);
   correct[0] = {{"key1", {0, 1, 2, 3, 4, 0.5}}, {"key2", {-1, -2}}};
   correct[1] = {{"key3", {1, 1, 2, 3, 4, 0.5}}};
 

@@ -46,14 +46,14 @@ std::string join(const std::vector<std::string> &strings,
   return result;
 }
 
-bool convertible_to_long_double(const std::string &s) {
+bool convertible_to_double(const std::string &s) {
   // no extraneous leading zeros
   if ((s.size() > 1 && s[0] == '0' && s[1] != '.') ||
       (s.size() > 2 && s[0] == '-' && s[1] == '0' && s[1] != '.'))
     return false;
 
   std::istringstream iss(s);
-  long double num;
+  double num;
   iss >> std::noskipws >> num;
   return iss.eof() && !iss.fail();
 }

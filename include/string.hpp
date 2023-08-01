@@ -27,11 +27,11 @@ std::string join(const std::vector<std::string> &strings,
                  std::string_view delimiter);
 
 /**
- * Check if a string is convertible to a long double. It is quite strict -
+ * Check if a string is convertible to a double. It is quite strict -
  * whitespace is not allowed, string must be fully consumed, no extraneous
  * leading zeros.
  */
-bool convertible_to_long_double(const std::string &s);
+bool convertible_to_double(const std::string &s);
 
 /**
  * Check if a string is convertible to a long long. No whitespace is allowed, no

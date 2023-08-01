@@ -37,11 +37,16 @@ using JsonObject = std::map<JsonString, Json>;
 /* Json does not distinguish different types of numbers, and there are no
  * limits on number size. We will simply use long double to store all JSON
  * representations of numbers. A "double" has 64-bits and is able to represent
- * any integer from -2^53 to 2^53 exactly, meanwhile a "long double" is
- * 128-bits. So it is only in very pathological cases where accuracy will be
- * lost.
+ * any integer from -2^53 to 2^53 exactly, which is usually more than enough.
+ *
+ * Originally I chose JsonNumber to be `long double`, but then I learned that
+ * ARM Macs don't actually properly support long double, so I changed it to
+ * `double`.
+ *
+ * If you want to handle `long double`s, you probably need to use a different
+ * implementation.
  */
-using JsonNumber = long double;
+using JsonNumber = double;
 
 /**
  * Parse a string formatted as JSON.
@@ -132,8 +137,6 @@ public:
 
   constexpr Json(float value) : value_{static_cast<JsonNumber>(value)} {}
   constexpr Json(double value) : value_{static_cast<JsonNumber>(value)} {}
-
-  constexpr Json(long double value) : value_{value} {}
 
   std::string dump() const;
   std::string pretty_dump(std::size_t tab_size = 2) const;

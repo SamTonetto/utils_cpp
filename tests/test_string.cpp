@@ -32,20 +32,20 @@ TEST_CASE("join") {
 
 TEST_CASE("convertible to long double") {
 
-  CHECK(utils::convertible_to_long_double("42"));
-  CHECK(utils::convertible_to_long_double("-42.0"));
-  CHECK(utils::convertible_to_long_double("42.0"));
-  CHECK(utils::convertible_to_long_double("42."));
-  CHECK(utils::convertible_to_long_double(".1"));
-  CHECK(utils::convertible_to_long_double(".01"));
-  CHECK(utils::convertible_to_long_double("0.5"));
+  CHECK(utils::convertible_to_double("42"));
+  CHECK(utils::convertible_to_double("-42.0"));
+  CHECK(utils::convertible_to_double("42.0"));
+  CHECK(utils::convertible_to_double("42."));
+  CHECK(utils::convertible_to_double(".1"));
+  CHECK(utils::convertible_to_double(".01"));
+  CHECK(utils::convertible_to_double("0.5"));
 
-  CHECK_FALSE(utils::convertible_to_long_double("."));
-  CHECK_FALSE(utils::convertible_to_long_double(" 0.2"));
-  CHECK_FALSE(utils::convertible_to_long_double(" 0.2 "));
-  CHECK_FALSE(utils::convertible_to_long_double("0.2 "));
-  CHECK_FALSE(utils::convertible_to_long_double("0. 5"));
-  CHECK_FALSE(utils::convertible_to_long_double("02.5"));
+  CHECK_FALSE(utils::convertible_to_double("."));
+  CHECK_FALSE(utils::convertible_to_double(" 0.2"));
+  CHECK_FALSE(utils::convertible_to_double(" 0.2 "));
+  CHECK_FALSE(utils::convertible_to_double("0.2 "));
+  CHECK_FALSE(utils::convertible_to_double("0. 5"));
+  CHECK_FALSE(utils::convertible_to_double("02.5"));
 }
 
 TEST_CASE("convertible to long long") {

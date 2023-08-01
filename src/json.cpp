@@ -437,7 +437,7 @@ std::size_t JsonParser::handle_scalar() {
     }
     std::string s = minified.substr(index, i - index);
 
-    if (convertible_to_long_double(s)) {
+    if (convertible_to_double(s)) {
       emplace_top<JsonNumber>(std::stold(s));
       return i - index;
     } else {
