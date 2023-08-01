@@ -27,16 +27,25 @@ jobs:
     - name: Update and install
       run: sudo apt-get install -y g++-13 cmake lcov doxygen
 
+      
     # ================================
-    # Build/run/test/coverage with GCC
+    # Build/run/test/coverage
     # ================================
 
+    # Ensure script is executable
     - name: Make build script executable
       run: chmod +x build-run-cov.sh
 
+
+    # gcc
     - name: Run build/run/test/coverage script
       run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
-    
+
+    # clang
+    - name: Run build/run/test/coverage script
+      run: TC=clang ${{github.workspace}}/./build-run-cov.sh
+
+
     # ====================
     # Upload code coverage
     # ====================
@@ -45,5 +54,5 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ${{github.workspace}}/gcc-build/gcc-coverage.info
+        files: ${{github.workspace}}/gcc-build/gcc-coverage.info ${{github.workspace}}/build/clang-coverage.info
 

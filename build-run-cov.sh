@@ -8,6 +8,9 @@
 # To run script for LLVM toolchain:
 #     TC=gcc build-run-cov.sh
 
+# Note: clangd, which is the language server used for editor LSPs, by default only searches subdirectories called build/. Therefore, instead of calling the two builds "gcc-build" and "build", we will just pick one to be called "build/", and that is the one that clangd will get compile_commands.json from. It probably doesn't matter, but we will pick 'clang' to be the default build folder, since it belongs to the same toolchain as clangd, so higher chance they play nice together. So we will have "build" and "gcc-build".
+
+
 # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 set -Eeuxo pipefail
 
@@ -18,6 +21,32 @@ if [ -z "${TC}" ]; then
     echo "Error: TC (toolchain) variable is not set. Please specify 'gcc' or 'clang'."
     echo "Example: TC=gcc ./build-run-cov.sh"
     exit 1
+
+elif [ "${TC}" = "clang" ]; then
+    export CC="clang"
+    export CXX="clang++"
+
+    if [ -d "build" ]; then
+	rm -r "build"
+    fi
+    
+    cmake --preset clang-build
+    cmake --build --preset clang-build -j4
+    cd build/tests/
+    
+    # reference: https://stackoverflow.com/questions/50613601/getting-llvm-cov-to-talk-to-codecov-io
+
+    LLVM_PROFILE_FILE="coverage/%p.profraw" ctest
+
+    # Merge coverage files
+    llvm-profdata merge -sparse coverage/*.profraw -o coverage/coverage.profdata
+
+    # Generate coverage report
+    llvm-cov export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
+
+    cd ../../
+
+
 elif [ "${TC}" = "gcc" ]; then
     export CC="gcc-13"
     export CXX="g++-13"
@@ -28,7 +57,7 @@ elif [ "${TC}" = "gcc" ]; then
     fi
 
     cmake --preset gcc-build
-    cmake --build --preset gcc-build
+    cmake --build --preset gcc-build -j4
     cd gcc-build/
     ctest
 
@@ -37,32 +66,6 @@ elif [ "${TC}" = "gcc" ]; then
 
     # Exclude system files.
     lcov --remove gcc-coverage.info '/usr/*' '/opt/*' --output-file gcc-coverage.info
-
-    # Exclude external/ folder
-    lcov --remove gcc-coverage.info "$BASE_DIR/external/*" --output-file gcc-coverage.info
-
-    cd ..
-
-
-elif [ "${TC}" = "clang" ]; then
-    export CC="clang"
-    export CXX="clang++"
-    COV="llvm-cov"
-
-    if [ -d "clang-build" ]; then
-	rm -r "clang-build"
-    fi
-    
-    cmake --preset clang-build
-    cmake --build --preset clang-build
-    cd clang-build/
-    ctest
-
-    # Create coverage report - lcov must be installed.
-    lcov --directory . --capture --output-file clang-coverage.info --gcov-tool $COV
-
-    # Exclude system files from report.
-    lcov --remove clang-coverage.info '/usr/*' '/opt/*' --output-file clang-coverage.info
 
     # Exclude external/ folder
     lcov --remove gcc-coverage.info "$BASE_DIR/external/*" --output-file gcc-coverage.info

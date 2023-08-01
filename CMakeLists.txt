@@ -11,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE OFF) # Enable verbose makefile for debugging
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Create a compile_commands.json for an LSP to use.
 
+
 if(NOT WIN32)
   string(ASCII 27 Esc)
   set(ColorReset "${Esc}[m")

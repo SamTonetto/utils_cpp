@@ -7,6 +7,24 @@
     },
     "configurePresets": [
 	{
+	    "name": "clang-build",
+	    "displayName": "Run/Build/Test with code coverage using LLVM toolchain.",
+	    "description": "Code coverage",
+	    "binaryDir": "${sourceDir}/build",
+	    "cacheVariables": {
+		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+		"CMAKE_CXX_FLAGS": "-fprofile-instr-generate -fcoverage-mapping",
+		"BUILD_TESTS": {
+		    "type": "BOOL",
+		    "value": "ON"
+		},
+		"BUILD_DEMOS": {
+		    "type": "BOOL",
+		    "value": "ON"
+		}
+	    }
+	},
+	{
 	    "name": "gcc-build",
 	    "displayName": "Run/Build/Test with code coverage using GNU toolchain.",
 	    "description": "Code coverage",
@@ -23,35 +41,17 @@
 		    "value": "ON"
 		}
 	    }
-	},
-	{
-	    "name": "clang-build",
-	    "displayName": "Run/Build/Test with code coverage using LLVM toolchain.",
-	    "description": "Code coverage",
-	    "binaryDir": "${sourceDir}/clang-build",
-	    "cacheVariables": {
-		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
-		"CMAKE_CXX_FLAGS": "-coverage",
-		"BUILD_TESTS": {
-		    "type": "BOOL",
-		    "value": "ON"
-		},
-		"BUILD_DEMOS": {
-		    "type": "BOOL",
-		    "value": "ON"
-		}
-	    }
 	}
     ],
     "buildPresets": [
 	{
-	    "name": "gcc-build",
-	    "configurePreset": "gcc-build",
+	    "name": "clang-build",
+	    "configurePreset": "clang-build",
 	    "configuration": "RelWithDebInfo"
 	},
 	{
-	    "name": "clang-build",
-	    "configurePreset": "clang-build",
+	    "name": "gcc-build",
+	    "configurePreset": "gcc-build",
 	    "configuration": "RelWithDebInfo"
 	}
     ]

@@ -19,7 +19,7 @@ Run
 git clone git@github.com:SamTonetto/utils_cpp.git
 ```
 
-### Adding as submodule to existing repo
+## Adding as submodule to existing repo
 
 To add this as a submodule to another project, run:
 ```
@@ -32,7 +32,7 @@ git submodule update --remote --merge
 ```
 
 
-### Building with CMake
+## Building with CMake
 
 To build the library, you will require CMake version at least 3.10, and a C++20 compiler. Then inside the `utils_cpp` project root, run
 ```
@@ -49,7 +49,7 @@ cmake ..
 make utils_docs
 ```
 
-### Including in a larger project
+## Including in a larger project
 
 After building with CMake, you can include this in a larger project by placing the `utils_cpp` project folder inside a folder such as `lib/` in your project, then adding to CMake:
 
