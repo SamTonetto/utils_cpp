@@ -101,11 +101,46 @@ struct json_iterator_value;
  */
 class Json {
 
+public:
+  // Variant unwrapper based on implementation here
+  // https://stackoverflow.com/a/72955535/2520385, and extended to recursively
+  // unwrap nested Json.
+  template <typename... Ts>
+  struct variant_unwrapper {
+    const std::variant<Ts...> &var;
+
+    template <typename T>
+    operator T() {
+      if constexpr (is_instantiation<std::vector, T>()) {
+        T vec_result;
+        vec_result.reserve(std::get<JsonArray>(var).size());
+        for (const auto &elem : std::get<JsonArray>(var)) {
+          vec_result.emplace_back(variant_unwrapper{elem.value_});
+        }
+        return vec_result;
+
+      } else if constexpr (is_instantiation<std::map, T>()) {
+        T map_result;
+        for (const auto &[key, val] : std::get<JsonObject>(var)) {
+          map_result.emplace(key, variant_unwrapper{val.value_});
+        }
+        return map_result;
+
+      } else {
+        return std::get<T>(var);
+      }
+    }
+  };
+
+  // deduction guide for compiler
+  template <typename... Ts>
+  variant_unwrapper(const std::variant<Ts...> &) -> variant_unwrapper<Ts...>;
+
 private:
   friend JsonParser;
 
-  using ValueType = std::variant<JsonObject, JsonArray, JsonNull, JsonBool,
-                                 JsonNumber, JsonString>;
+  using ValueType = std::variant<JsonObject, JsonArray, JsonNumber, JsonString,
+                                 JsonBool, JsonNull>;
 
   ValueType value_;
 
@@ -368,13 +403,49 @@ public:
   ValueType value() { return value_; }
 
   /**
-   * Number-aware getting.
+   * Extracts JSON into a standard C++ type.
+   * This version of .get() is used with this syntax:
+   * auto value = dict["key"].get<double>();
+   * It is also capable of extracting containers, e.g.
+   * auto value = dict["key"].get<std::vector<double>>();
    */
   template <typename T>
   T get() const {
-    return std::get<T>(value_);
+    if constexpr (is_instantiation<std::vector, T>()) {
+      T vec_result;
+      vec_result.reserve(std::get<JsonArray>(value_).size());
+      for (const auto &elem : std::get<JsonArray>(value_)) {
+        vec_result.emplace_back(variant_unwrapper{elem.value_});
+      }
+      return vec_result;
+    } else if constexpr (is_instantiation<std::map, T>()) {
+      T map_result;
+      for (const auto &[key, val] : std::get<JsonObject>(value_)) {
+        map_result.emplace(key, variant_unwrapper{val.value_});
+      }
+      return map_result;
+    } else {
+      return std::get<T>(value_);
+    }
   }
 
+  /**
+   * Extracts JSON into a standard C++ type.
+   * This version of .get() is used with this syntax:
+   * double value = dict["key"].get();
+   * It is also capable of extracting containers, e.g.
+   * std::vector<double> value = dict["key"].get();
+   */
+  variant_unwrapper<JsonObject, JsonArray, JsonNumber, JsonString, JsonBool,
+                    JsonNull>
+  get() const {
+    return variant_unwrapper{value_};
+  }
+
+  /**
+   * Extracts an array of scalars, with syntax:
+   * auto value = dict["key"].get_array<double>();
+   */
   template <typename T>
   std::vector<T> get_array() const {
     std::vector<T> result;

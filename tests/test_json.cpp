@@ -15,6 +15,40 @@ TEST_CASE("key with space") {
   CHECK(dict.dump() == "{\"key with space\":1}");
 }
 
+TEST_CASE("non-templated get()") {
+
+  utils::Json dict;
+
+  std::vector<double> vec_in{1, 2, 3};
+  std::map<std::string, double> obj_in{{"a", 1}, {"b", 2}};
+
+  dict["obj"] = obj_in;
+  dict["vec"] = vec_in;
+
+  std::vector<double> vec_out = dict["vec"].get();
+  std::map<std::string, double> obj_out = dict["obj"].get();
+
+  CHECK(vec_in == vec_out);
+  CHECK(obj_in == obj_out);
+}
+
+TEST_CASE("templated get()") {
+
+  utils::Json dict;
+
+  std::vector<double> vec_in{1, 2, 3};
+  std::map<std::string, double> obj_in{{"a", 1}, {"b", 2}};
+
+  dict["obj"] = obj_in;
+  dict["vec"] = vec_in;
+
+  auto vec_out = dict["vec"].get<std::vector<double>>();
+  auto obj_out = dict["obj"].get<std::map<std::string, double>>();
+
+  CHECK(vec_in == vec_out);
+  CHECK(obj_in == obj_out);
+}
+
 TEST_CASE("dump object") {
 
   utils::Json dict;
