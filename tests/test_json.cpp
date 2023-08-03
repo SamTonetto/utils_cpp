@@ -69,6 +69,17 @@ TEST_CASE("dump object") {
         "\"vector-string\": [\n    \"hello\",\n    \"world\"\n  ]\n}");
 }
 
+TEST_CASE("assign variant") {
+
+  std::variant<int, double> v = 1;
+
+  utils::Json j;
+
+  j["variant"] = v;
+
+  CHECK(j.dump() == "{\"variant\":1}");
+}
+
 TEST_CASE("create nested keys easily") {
 
   utils::Json dict;

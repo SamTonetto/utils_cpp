@@ -44,29 +44,28 @@ TEST_CASE("Testing is_same_container") {
 
 TEST_CASE("is stl container") {
 
-  CHECK(utils::is_stl_container<std::vector<int>>());
   CHECK(utils::is_stl_container<std::array<int, 2>>());
-  CHECK(utils::is_stl_container<std::pair<int, int>>());
   CHECK(utils::is_stl_container<std::bitset<5>>());
-  CHECK(utils::is_stl_container<std::valarray<int>>());
-  CHECK(utils::is_stl_container<std::tuple<int>>());
-  CHECK(utils::is_stl_container<std::span<int>>());
   CHECK(utils::is_stl_container<std::deque<int>>());
-  CHECK(utils::is_stl_container<std::list<int>>());
-  CHECK(utils::is_stl_container<std::vector<int>>());
-
-  CHECK(utils::is_stl_container<std::set<int>>());
-  CHECK(utils::is_stl_container<std::unordered_set<int>>());
   CHECK(utils::is_stl_container<std::forward_list<int>>());
+  CHECK(utils::is_stl_container<std::list<int>>());
   CHECK(utils::is_stl_container<std::map<int, int>>());
-  CHECK(utils::is_stl_container<std::unordered_map<int, int>>());
-  CHECK(utils::is_stl_container<std::multiset<int>>());
   CHECK(utils::is_stl_container<std::multimap<int, int>>());
-  CHECK(utils::is_stl_container<std::stack<int>>());
-  CHECK(utils::is_stl_container<std::queue<int>>());
+  CHECK(utils::is_stl_container<std::multiset<int>>());
+  CHECK(utils::is_stl_container<std::pair<int, int>>());
   CHECK(utils::is_stl_container<std::priority_queue<int>>());
-  CHECK(utils::is_stl_container<std::unordered_multiset<int>>());
+  CHECK(utils::is_stl_container<std::queue<int>>());
+  CHECK(utils::is_stl_container<std::set<int>>());
+  CHECK(utils::is_stl_container<std::span<int>>());
+  CHECK(utils::is_stl_container<std::stack<int>>());
+  CHECK(utils::is_stl_container<std::tuple<int>>());
+  CHECK(utils::is_stl_container<std::unordered_map<int, int>>());
   CHECK(utils::is_stl_container<std::unordered_multimap<int, int>>());
+  CHECK(utils::is_stl_container<std::unordered_multiset<int>>());
+  CHECK(utils::is_stl_container<std::unordered_set<int>>());
+  CHECK(utils::is_stl_container<std::valarray<int>>());
+  CHECK(utils::is_stl_container<std::vector<int>>());
+  CHECK(utils::is_stl_container<std::variant<int, std::vector<double>>>());
 
   CHECK(utils::is_stl_container<test_struct1>() == false);
   CHECK(utils::is_stl_container<test_struct2<int>>() == false);

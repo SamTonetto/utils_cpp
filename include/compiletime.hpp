@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <valarray>
+#include <variant>
 #include <vector>
 
 namespace utils {
@@ -79,6 +80,7 @@ constexpr bool is_stl_container() {
   return is_instantiation<std::span, T>() || is_instantiation<std::pair, T>() ||
          is_instantiation<std::tuple, T>() ||
          is_instantiation<std::vector, T>() ||
+         is_instantiation<std::variant, T>() ||
          is_instantiation<std::array, T>() ||
          is_instantiation<std::bitset, T>() ||
          is_instantiation<std::valarray, T>() ||

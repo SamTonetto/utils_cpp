@@ -481,6 +481,10 @@ public:
 
       this->value_.emplace<JsonNull>();
 
+    } else if constexpr (is_instantiation<std::variant, T>()) {
+
+      std::visit([this](auto &&arg) { *this = arg; }, val);
+
     } else if constexpr (std::is_arithmetic_v<T>) {
 
       this->value_.emplace<JsonNumber>(static_cast<JsonNumber>(val));
