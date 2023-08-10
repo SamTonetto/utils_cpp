@@ -44,30 +44,37 @@ endif()
 
 # ------ Documentation ------
 find_package(Doxygen)
-if(DOXYGEN_FOUND)
-  message(STATUS "utils_cpp -- ${Green}SUCCESS: Doxygen found${ColorReset}")
 
-  # Copy README.md to use as Doxygen mainpage
-  configure_file("${PROJECT_SOURCE_DIR}/README.md" "${CMAKE_CURRENT_BINARY_DIR}/README.md" COPYONLY)
-  # Copy doc awesome stylesheet
-  configure_file("${PROJECT_SOURCE_DIR}/docs/doxygen-awesome-css/doxygen-awesome.css"
-    "${CMAKE_CURRENT_BINARY_DIR}/doxygen-awesome.css" COPYONLY)
+option(BUILD_DOCS "Build docs" FALSE)
 
-  # Set input and output files
-  set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
-  message(STATUS "utils_cpp -- DOXYGEN_IN = ${DOXYGEN_IN}")
 
-  # Configure Doxyfile
-  configure_file(${DOXYGEN_IN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
+if(BUILD_DOCS)
+  if(DOXYGEN_FOUND)
+    message(STATUS "utils_cpp -- ${Green}SUCCESS: Doxygen found${ColorReset}")
 
-  add_custom_target(utils_docs ALL # all means documentation will be built when running "make"
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating API documentation with Doxygen"
-    VERBATIM)
-else(DOXYGEN_FOUND)
-  message(STATUS "utils_cpp -- ${Red}FAILURE: Doxygen not found. Doxygen must be installed to generate documentation${ColorReset}")
-endif(DOXYGEN_FOUND)
+
+    # Copy README.md to use as Doxygen mainpage
+    configure_file("${PROJECT_SOURCE_DIR}/README.md" "${CMAKE_CURRENT_BINARY_DIR}/README.md" COPYONLY)
+    # Copy doc awesome stylesheet
+    configure_file("${PROJECT_SOURCE_DIR}/docs/doxygen-awesome-css/doxygen-awesome.css"
+      "${CMAKE_CURRENT_BINARY_DIR}/doxygen-awesome.css" COPYONLY)
+
+    # Set input and output files
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
+    message(STATUS "utils_cpp -- DOXYGEN_IN = ${DOXYGEN_IN}")
+
+    # Configure Doxyfile
+    configure_file(${DOXYGEN_IN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
+
+    add_custom_target(utils_docs ALL # all means documentation will be built when running "make"
+      COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Generating API documentation with Doxygen"
+      VERBATIM)
+  else(DOXYGEN_FOUND)
+    message(STATUS "utils_cpp -- ${Red}FAILURE: Doxygen not found. Doxygen must be installed to generate documentation${ColorReset}")
+  endif(DOXYGEN_FOUND)
+endif(BUILD_DOCS)
 # ------ End Documentation ------
 
 
