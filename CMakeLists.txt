@@ -99,10 +99,21 @@ endif()
 # ================ End Build Type ================
 
 # ================ Build utils_cpp ================
-file(GLOB SOURCES "src/*.cpp")
-add_library(utils_cpp STATIC ${SOURCES})
-target_compile_options(utils_cpp PRIVATE -Wall)
-target_include_directories(utils_cpp PUBLIC include)
+find_package(Boost REQUIRED COMPONENTS graph)
+if (Boost_FOUND)
+  message(STATUS "graphlib_cpp -- ${Green}SUCCESS: Boost found${ColorReset}")
+  message(STATUS "graphlib_cpp -- Boost libraries: ${Boost_LIBRARIES}")
+  message(STATUS "graphlib_cpp -- Boost include path: ${Boost_INCLUDE_DIRS}")
+else()
+  message(STATUS "${Red}graphlib_cpp -- FAILURE: Boost not found${ColorReset}")
+  message(FATAL_ERROR "graphlib_cpp -- Boost not found")
+endif()
+
+
+# Define library as header-only, but link to boost graph.
+add_library(utils_cpp INTERFACE)
+target_include_directories(utils_cpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(utils_cpp INTERFACE Boost::graph)
 # ================ End Build utils_cpp ================
 
 

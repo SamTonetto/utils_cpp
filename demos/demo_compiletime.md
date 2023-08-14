@@ -2,20 +2,20 @@
 
 Some compile time utilities that are just useful.
 
+
+Test if T is an instantiation of a templated object,
+
 ```
-if constexpr (utils::is_vector<T>::value) {   // tests if T is a vector
-  // ...
-}
-if constexpr (utils::is_set<T>::value) {   // tests if T is a set
-  // ...
-}
-if constexpr (utils::is_unordered_set<T>::value) {   // tests if T is an unordered_set
-  // ...
-}
-if constexpr (utils::is_map<T>::value) {   // tests if T is a map
-  // ...
-}
-if constexpr (utils::is_unordered_map<T>::value) {   // tests if T is an unordered_map
-  // ...
-}
+std::vector<int> x;
+
+utils::is_instantiation<std::vector, decltype(x)>(); // true
+utils::is_isntantiation<std::map, decltype(x)>(); //false
+```
+
+Test if an object is an STL container,
+
+```
+utils::is_stl_container<std::vector<int>>(); // true
+utils::is_stl_container<int>(); // false
+utils::is_stl_container<customclass<int>>(); // false
 ```

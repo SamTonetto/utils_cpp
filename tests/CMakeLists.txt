@@ -7,3 +7,8 @@ foreach(test ${TESTS})
   add_test(NAME ${test_name} COMMAND ${test_name})
   message(STATUS "utils_cpp --   ${test_name}... ${Green}OK${ColorReset}")
 endforeach()
+
+
+add_subdirectory(graph)
+add_subdirectory(parallel)
+

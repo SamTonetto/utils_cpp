@@ -7,9 +7,10 @@
 #include <iostream>
 
 void wait_1us() { std::this_thread::sleep_for(std::chrono::microseconds(1)); }
-int wait_1us_and_increment(int x) {
+
+std::pair<int, int> wait_1us_and_increment(int x) {
   wait_1us();
-  return x + 1;
+  return {x, x + 1};
 }
 
 int test_increment(int x) { return x + 1; }
@@ -32,6 +33,6 @@ TEST_CASE("test timing a function with return value") {
   auto [result, duration] = timed_function(x);
 
   CHECK(result.has_value());
-  CHECK(result.value() == 2);
+  CHECK(result.value() == std::make_pair(x, x + 1));
   CHECK(duration > 0);
 }

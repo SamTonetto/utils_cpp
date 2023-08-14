@@ -13,7 +13,7 @@
 	    "binaryDir": "${sourceDir}/build",
 	    "cacheVariables": {
 		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
-		"CMAKE_CXX_FLAGS": "-fprofile-instr-generate -fcoverage-mapping",
+		"CMAKE_CXX_FLAGS": "-fprofile-instr-generate -fcoverage-mapping -fvisibility=hidden",
 		"BUILD_TESTS": {
 		    "type": "BOOL",
 		    "value": "ON"
@@ -31,7 +31,7 @@
 	    "binaryDir": "${sourceDir}/gcc-build",
 	    "cacheVariables": {
 		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
-		"CMAKE_CXX_FLAGS": "-coverage",
+		"CMAKE_CXX_FLAGS": "-coverage -fvisibility=hidden",
 		"BUILD_TESTS": {
 		    "type": "BOOL",
 		    "value": "ON"

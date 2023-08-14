@@ -31,7 +31,7 @@ elif [ "${TC}" = "clang" ]; then
     fi
     
     cmake --preset clang-build
-    cmake --build --preset clang-build -j4
+    cmake --build --preset clang-build -j6
     cd build/tests/
     
     # reference: https://stackoverflow.com/questions/50613601/getting-llvm-cov-to-talk-to-codecov-io
@@ -57,7 +57,7 @@ elif [ "${TC}" = "gcc" ]; then
     fi
 
     cmake --preset gcc-build
-    cmake --build --preset gcc-build -j4
+    cmake --build --preset gcc-build -j6
     cd gcc-build/
     ctest --rerun-failed --output-on-failure
 

@@ -25,7 +25,7 @@ jobs:
       run: sudo apt-get update
 
     - name: Update and install      
-      run: sudo apt-get install -y g++-13 cmake lcov doxygen
+      run: sudo apt-get install -y g++-13 cmake lcov doxygen libboost-graph-dev
 
     # https://github.com/llvm/llvm-project/issues/64182#issuecomment-1658085767
     - name: Apply workaround for llvm bug
