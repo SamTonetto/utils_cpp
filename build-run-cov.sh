@@ -23,8 +23,19 @@ if [ -z "${TC}" ]; then
     exit 1
 
 elif [ "${TC}" = "clang" ]; then
-    export CC="clang"
-    export CXX="clang++"
+
+    # Darwin = Mac, for running locally.
+    if [[ "$(uname -s)" == "Darwin" ]]; then
+	export CC="clang"
+	export CXX="clang++"
+	LLVM_PROFDATA_CMD="llvm-profdata"
+	LLVM_COV_CMD="llvm-cov"
+    else
+	export CC="clang-16"
+	export CXX="clang++-16"
+	LLVM_PROFDATA_CMD="llvm-profdata-16"
+	LLVM_COV_CMD="llvm-cov-16"
+    fi
 
     if [ -d "build" ]; then
 	rm -r "build"
@@ -38,11 +49,14 @@ elif [ "${TC}" = "clang" ]; then
 
     LLVM_PROFILE_FILE="coverage/%p.profraw" ctest --rerun-failed --output-on-failure
 
+
+
+
     # Merge coverage files
-    llvm-profdata merge -sparse coverage/*.profraw -o coverage/coverage.profdata
+    $LLVM_PROFDATA_CMD merge -sparse coverage/*.profraw -o coverage/coverage.profdata
 
     # Generate coverage report
-    llvm-cov export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
+    $LLVM_COV_CMD export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
 
     cd ../../
 

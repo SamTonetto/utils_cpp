@@ -37,14 +37,6 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh 16
 
-    - name: Symlink llvm tools
-      run: |
-        ln -s /usr/bin/clang-16 /usr/bin/clang
-        ln -s /usr/bin/clang++-16 /usr/bin/clang++
-        ln -s /usr/bin/llvm-profdata-16 /usr/bin/llvm-profdata
-        ln -s /usr/bin/llvm-cov-16 /usr/bin/llvm-cov
-
-
     # ===========================================
     # Build/run/test/coverage
     # Make sure it works with both gcc and clang.
