@@ -46,7 +46,8 @@
 #include <mutex>
 #include <sstream>
 
-template <typename T> struct _logger_impl_group_enabled {
+template <typename T>
+struct _logger_impl_group_enabled {
   static constexpr bool value = false;
 };
 
@@ -57,7 +58,8 @@ template <typename T> struct _logger_impl_group_enabled {
 
 #define ENABLE_LOG_GROUP(group_name)                                           \
   struct _logger_impl_##group_name;                                            \
-  template <> struct _logger_impl_group_enabled<_logger_impl_##group_name> {   \
+  template <>                                                                  \
+  struct _logger_impl_group_enabled<_logger_impl_##group_name> {               \
     static constexpr bool value = true;                                        \
   };
 
@@ -174,7 +176,8 @@ struct Logger {
  * This class does the actual logging. It is created and destroyed with each
  * call to LOG macro.
  */
-template <typename Group> class LogStream {
+template <typename Group>
+class LogStream {
 
   std::ostringstream ss;
 
@@ -188,7 +191,8 @@ public:
   LogStream(bool show_time, bool show_group, bool newline)
       : ss{}, show_time{show_time}, show_group{show_group}, newline{newline} {}
 
-  template <typename T> LogStream &operator<<(const T &value) {
+  template <typename T>
+  LogStream &operator<<(const T &value) {
     ss << value;
     return *this;
   }

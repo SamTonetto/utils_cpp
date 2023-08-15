@@ -46,17 +46,19 @@ elif [ "${TC}" = "clang" ]; then
     cd build/tests/
     
     # reference: https://stackoverflow.com/questions/50613601/getting-llvm-cov-to-talk-to-codecov-io
-
-    LLVM_PROFILE_FILE="coverage/%p.profraw" ctest --rerun-failed --output-on-failure
-
-
-
+    # This runs ctest, specifying format for output files.
+    # %p is process ID, %m is binary signature.
+    LLVM_PROFILE_FILE="coverage/%p-%m.profraw" ctest
 
     # Merge coverage files
-    $LLVM_PROFDATA_CMD merge -sparse coverage/*.profraw -o coverage/coverage.profdata
+    PROFRAW_FILES=$(find . -name "*.profraw")
+    $LLVM_PROFDATA_CMD merge -sparse $PROFRAW_FILES -o coverage/coverage.profdata
+
+    # Get all test binaries:
+    TESTBINARIES=$(find . -maxdepth 2 -name "test_*" -type f | sort)
 
     # Generate coverage report
-    $LLVM_COV_CMD export -format="lcov" test_* -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
+    $LLVM_COV_CMD export -format="lcov" $TESTBINARIES -instr-profile="coverage/coverage.profdata" > ../clang-coverage.info --ignore-filename-regex="external/*"
 
     cd ../../
 
@@ -73,7 +75,7 @@ elif [ "${TC}" = "gcc" ]; then
     cmake --preset gcc-build
     cmake --build --preset gcc-build -j6
     cd gcc-build/
-    ctest --rerun-failed --output-on-failure
+    ctest
 
     # Create coverage report - lcov must be installed.
     lcov --directory . --capture --output-file gcc-coverage.info --gcov-tool $COV
