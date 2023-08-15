@@ -144,20 +144,19 @@ struct EdgeProp {
 struct GraphProp {
 
   using variant_wrapper_type = variant_unwrapper<
-      std::string, double, int, std::size_t, std::vector<double>,
+      std::string, double, int, std::size_t, unsigned, std::vector<double>,
       std::pair<double, double>, std::vector<int>, std::pair<int, int>,
       std::vector<std::size_t>, std::pair<std::size_t, std::size_t>>;
 
   using const_variant_wrapper_type = const_variant_unwrapper<
-      std::string, double, int, std::size_t, std::vector<double>,
+      std::string, double, int, std::size_t, unsigned, std::vector<double>,
       std::pair<double, double>, std::vector<int>, std::pair<int, int>,
       std::vector<std::size_t>, std::pair<std::size_t, std::size_t>>;
 
-  using type =
-      std::variant<std::string, double, int, std::size_t, std::vector<double>,
-                   std::pair<double, double>, std::vector<int>,
-                   std::pair<int, int>, std::vector<std::size_t>,
-                   std::pair<std::size_t, std::size_t>>;
+  using type = std::variant<
+      std::string, double, int, std::size_t, unsigned, std::vector<double>,
+      std::pair<double, double>, std::vector<int>, std::pair<int, int>,
+      std::vector<std::size_t>, std::pair<std::size_t, std::size_t>>;
 
   type gprop;
 
