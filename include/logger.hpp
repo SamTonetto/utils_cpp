@@ -46,6 +46,10 @@
 #include <mutex>
 #include <sstream>
 
+// To ensure every time logger is included, user has access to print
+// convenience functions and STL container operator<< overloads.
+#include "print.hpp"
+
 template <typename T>
 struct _logger_impl_group_enabled {
   static constexpr bool value = false;
