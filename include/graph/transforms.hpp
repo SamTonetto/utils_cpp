@@ -61,12 +61,12 @@ inline void remove_vertices(GraphBundle &gb,
   std::unordered_set<Vertex<Graph>> removal_set(vertices.begin(),
                                                 vertices.end());
 
-  std::unordered_map<Vertex<Graph>, Vertex<Graph>> old_to_new_index_map;
+  std::unordered_map<Vertex<Graph>, Vertex<Graph>> index_map;
 
   Vertex<Graph> new_vertex_idx = 0;
   for (auto v : boost::make_iterator_range(boost::vertices(gb.graph))) {
     if (!removal_set.contains(v)) {
-      old_to_new_index_map[v] = new_vertex_idx;
+      index_map[v] = new_vertex_idx;
       ++new_vertex_idx;
     }
   }
@@ -76,14 +76,8 @@ inline void remove_vertices(GraphBundle &gb,
     auto v = boost::target(e, gb.graph);
 
     if (!removal_set.contains(u) && !removal_set.contains(v)) {
-      boost::add_edge(old_to_new_index_map[u], old_to_new_index_map[v],
-                      new_graph);
+      boost::add_edge(index_map[u], index_map[v], new_graph);
     }
-  }
-
-  std::unordered_map<Vertex<Graph>, Vertex<Graph>> index_map;
-  for (const auto &[old_v, new_v] : old_to_new_index_map) {
-    index_map[new_v] = old_v;
   }
 
   nlohmann::json transform_metadata;
@@ -92,7 +86,6 @@ inline void remove_vertices(GraphBundle &gb,
   transform_metadata["removed_vertices_count"] = vertices.size();
   transform_metadata["removed_vertices_frac"] =
       static_cast<double>(vertices.size()) / boost::num_vertices(gb.graph);
-  transform_metadata["index_map"] = index_map;
 
   gb["transforms"].push_back(transform_metadata);
 
@@ -215,19 +208,18 @@ inline void randomly_remove_edges_without_disconnecting(
 
   auto &g = gb.graph;
 
-  std::size_t original_num_edges = boost::num_edges(g);
-
   if (num_to_remove == 0) {
     return;
   }
 
+  std::size_t original_num_edges = boost::num_edges(g);
+
   // bool = true => can select edge, else don't select.
-  std::vector<std::pair<Edge<Graph>, bool>> edge_vec;
+  std::vector<std::pair<Edge<Graph>, bool>> edge_vec(boost::num_edges(g));
   for (auto edge : boost::make_iterator_range(boost::edges(g))) {
     edge_vec.push_back({edge, true});
   }
 
-  // boilerplate for using boost connected components.
   std::vector<std::size_t> components(boost::num_vertices(g));
 
   std::size_t num_removed = 0;
