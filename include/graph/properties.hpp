@@ -28,13 +28,10 @@ template <typename GraphType>
 class GraphBundle {
 public:
   GraphType graph;
-
-private:
   Properties props;
 
-public:
-  std::map<std::string, nlohmann::json> &vertex;
-  std::map<std::string, nlohmann::json> &edge;
+  std::map<std::string, nlohmann::json> &vertex; // alias for props.vertex
+  std::map<std::string, nlohmann::json> &edge;   // alias for props.edge
 
 public:
   GraphBundle() : graph{}, props{}, vertex{props.vertex}, edge{props.edge} {}
