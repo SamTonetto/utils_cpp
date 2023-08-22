@@ -1,5 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 #include "graph/library.hpp"
 
@@ -13,8 +13,8 @@ TEST_CASE("grid graph") {
   CHECK(boost::num_vertices(g) == 9);
   CHECK(boost::num_edges(g) == 12);
 
-  std::string name = gb["name"].get();
-  std::size_t height = gb["height"].get();
+  std::string name = gb["name"];
+  std::size_t height = gb["height"];
 
   CHECK(height == 3);
 

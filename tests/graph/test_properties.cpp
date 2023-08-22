@@ -1,5 +1,5 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include "doctest/doctest.h"
 
 #include "graph/properties.hpp"
 
@@ -17,7 +17,7 @@ TEST_CASE("create graph property") {
   p.graph["name"] = "test";
   p.graph["height"] = 3;
 
-  auto position = p.vertex["position"].get<std::array<double, 2>>();
+  gl::VertexMap<std::array<double, 2>> position = p.vertex["position"];
 
   CHECK(position == map);
 
