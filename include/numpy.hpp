@@ -36,6 +36,8 @@ struct arange {
 
   std::size_t size;
 
+  arange() = default;
+
   arange(T start, T stop, T step = 1)
       : start{start}, stop{stop}, step{step},
         size{static_cast<std::size_t>((stop - start) / step)} {
