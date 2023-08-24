@@ -134,7 +134,7 @@ TEST_CASE("test_newline_io_manip") {
 
   SUBCASE("newline") {
     std::stringstream ss;
-    ss << utils::prettyprint << v;
+    ss << utils::prettyprint(true) << v;
 
     CHECK(ss.str() ==
           "[\n  [\n    {0, 1, 2, 3},\n    {0, 2, 3, 5}\n  ],\n  [\n    "
@@ -184,4 +184,13 @@ TEST_CASE("test_print_binary") {
     CHECK(utils::to_binary_string(y) ==
           "1000000000000000000000000000000000000000000000000000000000000000");
   }
+}
+
+TEST_CASE("escape special chars") {
+
+  std::stringstream ss;
+  ss << utils::escape_special_chars(true) << "hello\nworld" << '\t';
+  ss << utils::escape_special_chars(false) << "hello\nworld" << '\t';
+
+  CHECK(ss.str() == "hello\\nworld\\thello\nworld\t");
 }

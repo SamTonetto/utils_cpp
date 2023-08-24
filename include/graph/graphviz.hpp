@@ -7,7 +7,9 @@
  ***********************************************************************/
 
 #include "graph/graph.hpp"
+#include "graph/properties.hpp"
 
+#include <fstream>
 #include <unordered_map>
 #include <vector>
 
@@ -89,7 +91,14 @@ struct GraphWriter {
     }
 
     for (auto e : boost::make_iterator_range(boost::edges(g))) {
-      os << "  " << boost::source(e, g) << " -> " << boost::target(e, g);
+
+      if constexpr (std::is_same_v<
+                        typename detail::GraphDirectedness<GraphType>::type,
+                        boost::undirectedS>) {
+        os << "  " << boost::source(e, g) << " -- " << boost::target(e, g);
+      } else {
+        os << "  " << boost::source(e, g) << " -> " << boost::target(e, g);
+      }
 
       if (edge_props.at(e).size() > 0) {
         os << " [";
@@ -112,6 +121,31 @@ struct GraphWriter {
 
   const GraphType &g;
 };
+
+/**
+ * A basic dot writer that includes position information if it exists.
+ */
+inline void to_dot(const GraphBundle &gb, const std::string &filename) {
+
+  gl::GraphWriter gw(gb.graph);
+
+  gw.add_graph_property("splines", "true");
+  gw.add_vertex_property("shape", "circle");
+  gw.add_edge_property("penwidth", "2");
+
+  if (gb.vertex.contains("position")) {
+    gw.add_vertex_property("pin", "true");
+    gl::VertexMap<std::array<double, 2>> pos = gb.vertex["position"];
+    for (auto [v, p] : pos) {
+      gw.vertex_props[v]["pos"] =
+          "\"" + std::to_string(p[0]) + "," + std::to_string(p[1]) + "!" + "\"";
+    }
+  }
+
+  std::ofstream ofs(filename);
+  gw.write(ofs);
+  ofs.close();
+}
 
 } // namespace gl
 

@@ -35,15 +35,66 @@ inline int tab_width_index = std::ios_base::xalloc();
 // Only used if os.iword(newline_flag_index) is true
 inline thread_local std::size_t indent_amount = 0;
 
-inline std::ostream &prettyprint(std::ostream &os) {
-  os.iword(newline_flag_index) = 1;
-  return os;
-}
+class escape_special_chars_buf : public std::streambuf {
 
-inline std::ostream &noprettyprint(std::ostream &os) {
-  os.iword(newline_flag_index) = 0;
-  return os;
-}
+protected:
+  char process_char(char c) {
+    switch (c) {
+    case '\n':
+      return 'n';
+    case '\t':
+      return 't';
+    default:
+      return 0;
+    }
+  }
+
+  virtual int_type overflow(int_type c) {
+    if (c != EOF) {
+      char special = process_char(c);
+      if (special) {
+        original_buf->sputc('\\');
+        original_buf->sputc(special);
+      } else {
+        original_buf->sputc(c);
+      }
+    }
+    return c;
+  }
+
+  virtual int sync() { return original_buf->pubsync(); }
+
+public:
+  explicit escape_special_chars_buf(std::streambuf *buf) : original_buf(buf) {}
+  std::streambuf *original_buf;
+};
+
+struct escape_special_chars {
+  bool state;
+  escape_special_chars(bool state) : state(state) {}
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const escape_special_chars &esc) {
+    if (esc.state) {
+      static escape_special_chars_buf escape_buf(os.rdbuf());
+      os.rdbuf(&escape_buf);
+    } else {
+      os.rdbuf(
+          static_cast<escape_special_chars_buf *>(os.rdbuf())->original_buf);
+    }
+    return os;
+  }
+};
+
+struct prettyprint {
+  bool state;
+  prettyprint(bool state) : state(state) {}
+
+  friend std::ostream &operator<<(std::ostream &os, const prettyprint &pp) {
+    os.iword(newline_flag_index) = pp.state;
+    return os;
+  }
+};
 
 // Set the with of one indentation level
 // Since the default width of 2 is represented as 0, we have to subtract 2 from

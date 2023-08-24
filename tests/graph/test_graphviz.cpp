@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#include "print.hpp"
+
 #include "graph/graphviz.hpp"
 #include "graph/library.hpp"
 
@@ -28,8 +30,8 @@ TEST_CASE("write basic graph") {
 
   std::string expected =
       "graph G {\n  splines=true;\n  0 [shape=square];\n  1 [shape=circle];\n  "
-      "2 [shape=circle];\n  3 [shape=circle];\n  0 -> 1 [penwidth=2];\n  0 -> "
-      "2 [penwidth=2];\n  1 -> 3 [penwidth=2];\n  2 -> 3 [penwidth=2];\n}\n";
+      "2 [shape=circle];\n  3 [shape=circle];\n  0 -- 1 [penwidth=2];\n  0 -- "
+      "2 [penwidth=2];\n  1 -- 3 [penwidth=2];\n  2 -- 3 [penwidth=2];\n}\n";
 
   CHECK(ss.str() == expected);
 }
@@ -70,4 +72,28 @@ TEST_CASE("write basic digraph with positioning") {
       "[penwidth=2];\n  0 -> 2 [penwidth=2];\n  2 -> 0 [penwidth=2];\n}\n";
 
   CHECK(ss.str() == expected);
+}
+
+TEST_CASE("test to dot") {
+
+  auto g = gl::grid(2, 2);
+
+  gl::to_dot(g, "_test_to_dot_output.dot");
+
+  std::ifstream ifs("_test_to_dot_output.dot");
+
+  std::stringstream ss;
+  ss << ifs.rdbuf();
+
+  std::string expected =
+      "graph G {\n  splines=true;\n  0 [pos=\"0.000000,0.000000!\", pin="
+      "true, shape=circle];\n  1 [pos=\"1.000000,0.000000!\", pin=true, "
+      "shape=circle];\n  2 [pos=\"0.000000,1.000000!\", pin=true, shape"
+      "=circle];\n  3 [pos=\"1.000000,1.000000!\", pin=true, shape="
+      "circle];\n  0 -- 1 [penwidth=2];\n  0 -- 2 [penwidth=2];\n  1 -- 3 "
+      "[penwidth=2];\n  2 -- 3 [penwidth=2];\n}\n";
+
+  CHECK(ss.str() == expected);
+
+  std::remove("_test_to_dot_output.dot");
 }
