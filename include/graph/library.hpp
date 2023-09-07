@@ -124,7 +124,7 @@ inline GraphBundle grid(std::size_t h, std::size_t w) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < h; ++i) {
     for (std::size_t j = 0; j < w; ++j) {
       positions[boost::add_vertex(gb.graph)] = {static_cast<double>(j),
@@ -157,7 +157,7 @@ inline GraphBundle complete(std::size_t size) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < size; ++i) {
     positions[boost::add_vertex(gb.graph)] = {
         std::cos(2.0 * M_PI * i / static_cast<double>(size)),
@@ -185,7 +185,7 @@ inline GraphBundle kuratowski(std::size_t h, std::size_t w) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < h * w; ++i) {
 
     std::size_t x = i % w;
@@ -224,7 +224,7 @@ inline GraphBundle chimera(std::size_t h, std::size_t w, std::size_t k_cc) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < 2 * k_cc * h * w; ++i) {
 
     std::size_t quotient = i / (2 * w);
@@ -270,7 +270,7 @@ inline GraphBundle ring(std::size_t size) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < size; ++i) {
 
     positions[boost::add_vertex(gb.graph)] = {
@@ -298,7 +298,7 @@ inline GraphBundle path(std::size_t size) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < size; ++i) {
     positions[boost::add_vertex(gb.graph)] = {static_cast<double>(i), 0.0};
   }
@@ -323,7 +323,7 @@ inline GraphBundle ibm_hex(std::size_t nrows, std::size_t ncols) {
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
 
   const std::size_t num_qubits = 5 * nrows * ncols + 4 * (nrows + ncols) - 1;
 
@@ -463,7 +463,7 @@ inline GraphBundle kagome(std::size_t nrows, std::size_t ncols) {
 
   // Add vertices
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t r = 0; r < nrows + 1; ++r) {
     for (std::size_t c = 0; c < ncols + 1; ++c) {
       if (r % 2 == 1 && c % 2 == 1) {
@@ -527,7 +527,7 @@ inline GraphBundle random(std::size_t size, double density, unsigned seed) {
   gb["density"] = density;
   gb["seed"] = seed;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < size; ++i) {
 
     positions[boost::add_vertex(gb.graph)] = {
@@ -559,7 +559,7 @@ inline GraphBundle random_bipartite(std::size_t size1, std::size_t size2,
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
 
   std::mt19937 gen(seed);
 
@@ -682,7 +682,7 @@ inline GraphBundle random_regular(std::size_t size, std::size_t degree,
 
   Graph &g = gb.graph;
 
-  VertexMap<std::array<double, 2>> positions;
+  VertexMap<std::vector<double>> positions;
 
   std::mt19937 gen(seed);
 

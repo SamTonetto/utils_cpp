@@ -16,11 +16,12 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <stack>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
-#include "compiletime.hpp"
+#include "metaprogramming/is_instantiation.hpp"
 #include "string.hpp"
 
 namespace utils {

@@ -135,7 +135,7 @@ inline void to_dot(const GraphBundle &gb, const std::string &filename) {
 
   if (gb.vertex.contains("position")) {
     gw.add_vertex_property("pin", "true");
-    gl::VertexMap<std::array<double, 2>> pos = gb.vertex["position"];
+    gl::VertexMap<std::vector<double>> pos = gb.vertex["position"];
     for (auto [v, p] : pos) {
       gw.vertex_props[v]["pos"] =
           "\"" + std::to_string(p[0]) + "," + std::to_string(p[1]) + "!" + "\"";

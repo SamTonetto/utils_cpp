@@ -14,11 +14,11 @@ TEST_CASE("grid graph") {
   CHECK(boost::num_edges(g) == 12);
 
   std::string name = gb["name"];
-  std::size_t height = gb["height"];
+  double height = gb["height"];
 
-  CHECK(height == 3);
+  CHECK(height == 3.0);
 
-  CHECK(gb["width"].get<std::size_t>() == 3);
+  CHECK(gb["width"] == 3.0);
 }
 
 TEST_CASE("complete graph") {
