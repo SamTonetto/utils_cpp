@@ -6,33 +6,44 @@
 
 using namespace utils;
 
+#include "graph/graphviz.hpp"
+TEST_CASE("test remove") {
+
+  auto gb = gl::grid(3, 3);
+
+  auto new_gb = gl::remove_vertices(gb, {0, 1, 3, 5});
+
+  gl::VertexMap<std::vector<double>> pos = gb.props.vertex["position"];
+  std::cout << "pos = " << pos << std::endl;
+
+  utils::gl::to_dot(new_gb, "test_remove.dot");
+}
+
 TEST_CASE("test remove edges") {
 
   auto gb = gl::grid(20, 20);
 
-  std::size_t n_edges_before = boost::num_edges(gb.graph);
-
-  double frac_to_remove = 0.01;
+  double frac_to_remove = 0.1;
   unsigned seed = 0;
-  gl::randomly_remove_edges_without_disconnecting(gb, frac_to_remove, seed);
 
-  std::size_t n_edges_after = boost::num_edges(gb.graph);
+  auto new_gb = gl::rand_prune_edges_connected(gb, frac_to_remove, seed);
 
-  CHECK(std::abs((double)n_edges_after / n_edges_before - 0.9) < 0.1);
+  CHECK(std::abs((double)boost::num_edges(new_gb.graph) /
+                     boost::num_edges(gb.graph) -
+                 0.9) < 0.1);
 }
 
 TEST_CASE("test remove vertices") {
   auto gb = gl::grid(9, 9);
 
-  std::size_t n_vertices_before = boost::num_vertices(gb.graph);
-
-  double frac_to_remove = 0.01;
+  double frac_to_remove = 0.1;
   unsigned seed = 0;
-  gl::randomly_remove_vertices_without_disconnecting(gb, frac_to_remove, seed);
 
-  std::size_t n_vertices_after = boost::num_vertices(gb.graph);
+  auto new_gb = gl::rand_prune_connected(gb, frac_to_remove, seed);
 
-  CHECK(std::abs((double)n_vertices_after / n_vertices_before - 0.99) < 0.1);
+  CHECK(std::abs((double)boost::num_vertices(new_gb.graph) /
+                     boost::num_vertices(gb.graph) -
+                 0.99) < 0.1);
 }
 
 TEST_CASE("test remove vertices by list") {
@@ -43,19 +54,16 @@ TEST_CASE("test remove vertices by list") {
   CHECK(boost::num_edges(gb.graph) == 12);
 
   std::vector<std::size_t> to_remove = {0, 1, 3, 5};
-  gl::remove_vertices(gb, to_remove);
+  auto new_gb = gl::remove_vertices(gb, to_remove);
 
-  CHECK(boost::num_vertices(gb.graph) == 5);
-  CHECK(boost::num_edges(gb.graph) == 3);
+  CHECK(boost::num_vertices(new_gb.graph) == 5);
+  CHECK(boost::num_edges(new_gb.graph) == 3);
 
-  CHECK(boost::edge(1, 3, gb.graph).second);
-  CHECK(boost::edge(2, 3, gb.graph).second);
-  CHECK(boost::edge(3, 4, gb.graph).second);
+  CHECK(boost::edge(1, 3, new_gb.graph).second);
+  CHECK(boost::edge(2, 3, new_gb.graph).second);
+  CHECK(boost::edge(3, 4, new_gb.graph).second);
 
-  CHECK(gb["transforms"][0]["removed_vertices"] ==
-        std::vector<std::size_t>({0, 1, 3, 5}));
-  CHECK(gb["transforms"][0]["removed_vertices_count"] == 4);
-  CHECK(gb["transforms"][0]["removed_vertices_frac"] == 4.0 / 9.0);
+  CHECK(new_gb["removed_vertices"] == std::vector<double>({0, 1, 3, 5}));
 }
 
 TEST_CASE("test remove edges by list") {
@@ -65,26 +73,22 @@ TEST_CASE("test remove edges by list") {
   CHECK(boost::num_vertices(gb.graph) == 9);
   CHECK(boost::num_edges(gb.graph) == 12);
 
-  std::vector<std::array<std::size_t, 2>> to_remove = {
+  std::vector<std::vector<std::size_t>> to_remove = {
       {0, 1}, {1, 2}, {1, 4}, {6, 7}};
-  gl::remove_edges(gb, to_remove);
+  auto new_gb = gl::remove_edges(gb, to_remove);
 
-  CHECK(boost::num_vertices(gb.graph) == 9);
-  CHECK(boost::num_edges(gb.graph) == 8);
+  CHECK(boost::num_vertices(new_gb.graph) == 9);
+  CHECK(boost::num_edges(new_gb.graph) == 8);
 
-  CHECK(boost::edge(0, 3, gb.graph).second);
-  CHECK(boost::edge(2, 5, gb.graph).second);
-  CHECK(boost::edge(3, 4, gb.graph).second);
-  CHECK(boost::edge(4, 5, gb.graph).second);
-  CHECK(boost::edge(3, 6, gb.graph).second);
-  CHECK(boost::edge(4, 7, gb.graph).second);
-  CHECK(boost::edge(5, 8, gb.graph).second);
-  CHECK(boost::edge(7, 8, gb.graph).second);
+  CHECK(boost::edge(0, 3, new_gb.graph).second);
+  CHECK(boost::edge(2, 5, new_gb.graph).second);
+  CHECK(boost::edge(3, 4, new_gb.graph).second);
+  CHECK(boost::edge(4, 5, new_gb.graph).second);
+  CHECK(boost::edge(3, 6, new_gb.graph).second);
+  CHECK(boost::edge(4, 7, new_gb.graph).second);
+  CHECK(boost::edge(5, 8, new_gb.graph).second);
+  CHECK(boost::edge(7, 8, new_gb.graph).second);
 
-  CHECK(
-      gb["transforms"][0]["removed_edges"] ==
-      std::vector<std::array<std::size_t, 2>>{{0, 1}, {1, 2}, {1, 4}, {6, 7}});
-
-  CHECK(gb["transforms"][0]["removed_edges_count"] == 4);
-  CHECK(gb["transforms"][0]["removed_edges_frac"] == 4.0 / 12.0);
+  CHECK(new_gb["removed_edges"] ==
+        std::vector<std::vector<double>>{{0, 1}, {1, 2}, {1, 4}, {6, 7}});
 }

@@ -37,7 +37,7 @@ void write_to_file(const std::string &filename, const gl::GraphBundle &gb) {
   gl::VertexMap<std::string> shapeMap; // Shape of vertices.
   gl::VertexMap<std::string> labelMap; // Label of vertices.
 
-  gl::VertexMap<std::vector<double>> position = gb.vertex["position"];
+  gl::VertexMap<std::vector<double>> position = gb.props.vertex["position"];
   for (auto [v, pos] : position) {
     positionMap[v] =
         std::to_string(pos[0]) + ',' + std::to_string(pos[1]) + '!';

@@ -141,13 +141,13 @@ inline GraphBundle grid(std::size_t h, std::size_t w) {
     }
   }
 
-  gb["name"] = "grid";
-  gb["height"] = h;
-  gb["width"] = w;
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "grid";
+  gb.props.graph["height"] = h;
+  gb.props.graph["width"] = w;
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -170,12 +170,12 @@ inline GraphBundle complete(std::size_t size) {
     }
   }
 
-  gb["name"] = "complete";
-  gb["size"] = size;
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "complete";
+  gb.props.graph["size"] = size;
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -207,13 +207,13 @@ inline GraphBundle kuratowski(std::size_t h, std::size_t w) {
       boost::add_edge(i, i + w, g); // connect down
   }
 
-  gb["name"] = "kuratowski";
-  gb["height"] = h;
-  gb["width"] = w;
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "kuratowski";
+  gb.props.graph["height"] = h;
+  gb.props.graph["width"] = w;
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -256,11 +256,11 @@ inline GraphBundle chimera(std::size_t h, std::size_t w, std::size_t k_cc) {
     }
   }
 
-  gb["name"] = "chimera";
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "chimera";
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -282,12 +282,12 @@ inline GraphBundle ring(std::size_t size) {
     boost::add_edge(i, (i + 1) % size, g);
   }
 
-  gb["name"] = "ring";
-  gb["size"] = size;
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "ring";
+  gb.props.graph["size"] = size;
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -307,12 +307,12 @@ inline GraphBundle path(std::size_t size) {
     boost::add_edge(i, (i + 1) % size, g);
   }
 
-  gb["name"] = "path";
-  gb["size"] = size;
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["name"] = "path";
+  gb.props.graph["size"] = size;
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -327,9 +327,9 @@ inline GraphBundle ibm_hex(std::size_t nrows, std::size_t ncols) {
 
   const std::size_t num_qubits = 5 * nrows * ncols + 4 * (nrows + ncols) - 1;
 
-  gb["name"] = "ibm_hex";
-  gb["num_rows"] = nrows;
-  gb["num_cols"] = ncols;
+  gb.props.graph["name"] = "ibm_hex";
+  gb.props.graph["num_rows"] = nrows;
+  gb.props.graph["num_cols"] = ncols;
 
   const std::size_t longest_line = 4 * (nrows * ncols + nrows + ncols) + 1;
   const std::size_t qwidth = 4 * (ncols + 1) - 1;
@@ -431,10 +431,10 @@ inline GraphBundle ibm_hex(std::size_t nrows, std::size_t ncols) {
     boost::add_edge(below_index, i, g);
   }
 
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -445,17 +445,17 @@ inline GraphBundle kagome(std::size_t nrows, std::size_t ncols) {
 
   Graph &g = gb.graph;
 
-  gb["name"] = "kagome";
-  gb["num_rows"] = nrows;
-  gb["num_cols"] = ncols;
+  gb.props.graph["name"] = "kagome";
+  gb.props.graph["num_rows"] = nrows;
+  gb.props.graph["num_cols"] = ncols;
 
   const std::size_t num_grid_vertices = (nrows + 1) * (ncols + 1);
   const std::size_t num_grid_edges = (nrows + 1) * ncols + (ncols + 1) * nrows;
   const std::size_t num_vertices = num_grid_vertices + num_grid_edges;
 
-  gb["num_grid_vertices"] = num_grid_vertices;
-  gb["num_grid_edges"] = num_grid_edges;
-  gb["num_vertices"] = num_vertices;
+  gb.props.graph["num_grid_vertices"] = num_grid_vertices;
+  gb.props.graph["num_grid_edges"] = num_grid_edges;
+  gb.props.graph["num_vertices"] = num_vertices;
 
   std::unordered_map<std::pair<std::size_t, std::size_t>, std::size_t,
                      pair_hash<std::size_t, std::size_t>>
@@ -507,9 +507,9 @@ inline GraphBundle kagome(std::size_t nrows, std::size_t ncols) {
     }
   }
 
-  gb["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -522,10 +522,10 @@ inline GraphBundle random(std::size_t size, double density, unsigned seed) {
 
   Graph &g = gb.graph;
 
-  gb["name"] = "random";
-  gb["size"] = size;
-  gb["density"] = density;
-  gb["seed"] = seed;
+  gb.props.graph["name"] = "random";
+  gb.props.graph["size"] = size;
+  gb.props.graph["density"] = density;
+  gb.props.graph["seed"] = seed;
 
   VertexMap<std::vector<double>> positions;
   for (std::size_t i = 0; i < size; ++i) {
@@ -545,10 +545,10 @@ inline GraphBundle random(std::size_t size, double density, unsigned seed) {
     }
   }
 
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -563,11 +563,11 @@ inline GraphBundle random_bipartite(std::size_t size1, std::size_t size2,
 
   std::mt19937 gen(seed);
 
-  gb["name"] = "random_bipartite";
-  gb["size1"] = size1;
-  gb["size2"] = size2;
-  gb["density"] = density;
-  gb["seed"] = seed;
+  gb.props.graph["name"] = "random_bipartite";
+  gb.props.graph["size1"] = size1;
+  gb.props.graph["size2"] = size2;
+  gb.props.graph["density"] = density;
+  gb.props.graph["seed"] = seed;
 
   for (std::size_t i = 0; i < size1; ++i) {
     positions[boost::add_vertex(gb.graph)] = {0, static_cast<double>(i)};
@@ -587,10 +587,10 @@ inline GraphBundle random_bipartite(std::size_t size1, std::size_t size2,
     }
   }
 
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }
@@ -694,10 +694,10 @@ inline GraphBundle random_regular(std::size_t size, std::size_t degree,
     throw std::runtime_error("degree must be less than size");
   }
 
-  gb["name"] = "random_regular";
-  gb["size"] = size;
-  gb["degree"] = degree;
-  gb["seed"] = seed;
+  gb.props.graph["name"] = "random_regular";
+  gb.props.graph["size"] = size;
+  gb.props.graph["degree"] = degree;
+  gb.props.graph["seed"] = seed;
 
   auto edges = _try_creation(size, degree, gen);
   while (!edges) {
@@ -713,10 +713,10 @@ inline GraphBundle random_regular(std::size_t size, std::size_t degree,
     boost::add_edge(s1, s2, g);
   }
 
-  gb["num_vertices"] = boost::num_vertices(g);
-  gb["num_edges"] = boost::num_edges(g);
+  gb.props.graph["num_vertices"] = boost::num_vertices(g);
+  gb.props.graph["num_edges"] = boost::num_edges(g);
 
-  gb.vertex["position"] = positions;
+  gb.props.vertex["position"] = positions;
 
   return gb;
 }

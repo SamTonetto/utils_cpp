@@ -10,305 +10,269 @@
 
 #include "graph/graph.hpp"
 #include "graph/properties.hpp"
-#include "graph/transforms.hpp"
+#include "graph/transforms_def.hpp"
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>
+
+#include "print.hpp"
 
 #include <random>
 
 namespace utils {
 namespace gl {
 
-// Vertex removal
-
-void remove_vertices(GraphBundle &g, const std::vector<std::size_t> &vertices);
-
-void randomly_remove_vertices_without_disconnecting(
-    GraphBundle &gb, std::size_t num_to_remove,
-    unsigned seed = std::random_device{}());
-
-void randomly_remove_vertices_without_disconnecting(
-    Graph &g, double fraction_to_remove,
-    unsigned seed = std::random_device{}());
-
-// Edge removal
-
-void remove_edges(const GraphBundle &gb,
-                  const std::vector<std::array<std::size_t, 2>> &edges);
-
-void randomly_remove_edges_without_disconnecting(
-    GraphBundle &gb, std::size_t num_to_remove,
-    unsigned seed = std::random_device{}());
-
-void randomly_remove_dges_without_disconnecting(
-    Graph &g, double fraction_to_remove,
-    unsigned seed = std::random_device{}());
-
-// ==========================================
-// =========== Implementation ===============
-// ==========================================
-
 // ==== Vertices ====
 
-inline void remove_vertices(GraphBundle &gb,
+inline GraphBundle remove_vertices(const GraphBundle &gb,
+                                   const std::vector<std::size_t> &vertices) {
 
-                            const std::vector<std::size_t> &vertices) {
+  // Instead of removing vertices from existing graph,
+  // instead construct a new graph.
+  // 1. Obtain a mapping from old -> new vertex indices: v -> f(v)
+  // 2. Construct new graph from these mappings.
 
   Graph new_graph;
 
   std::unordered_set<Vertex<Graph>> removal_set(vertices.begin(),
                                                 vertices.end());
 
-  std::unordered_map<Vertex<Graph>, Vertex<Graph>> index_map;
-
+  // Step 1.
+  std::unordered_map<Vertex<Graph>, Vertex<Graph>> old_to_new_index_map;
   Vertex<Graph> new_vertex_idx = 0;
   for (auto v : boost::make_iterator_range(boost::vertices(gb.graph))) {
     if (!removal_set.contains(v)) {
-      index_map[v] = new_vertex_idx;
+      old_to_new_index_map[v] = new_vertex_idx;
       ++new_vertex_idx;
     }
   }
 
+  // Step 2.
   for (auto e : boost::make_iterator_range(boost::edges(gb.graph))) {
     auto u = boost::source(e, gb.graph);
     auto v = boost::target(e, gb.graph);
 
     if (!removal_set.contains(u) && !removal_set.contains(v)) {
-      boost::add_edge(index_map[u], index_map[v], new_graph);
+      boost::add_edge(old_to_new_index_map[u], old_to_new_index_map[v],
+                      new_graph);
     }
   }
 
-  nlohmann::json transform_metadata;
-  transform_metadata["type"] = "remove_vertices";
-  transform_metadata["removed_vertices"] = vertices;
-  transform_metadata["removed_vertices_count"] = vertices.size();
-  transform_metadata["removed_vertices_frac"] =
-      static_cast<double>(vertices.size()) / boost::num_vertices(gb.graph);
+  // --- Update Properties ----
 
-  gb["transforms"].push_back(transform_metadata);
+  std::unordered_map<Vertex<Graph>, Vertex<Graph>> new_to_old_index_map;
+  for (auto &[k, v] : old_to_new_index_map) {
+    new_to_old_index_map[v] = k;
+  }
 
-  gb.graph = std::move(new_graph);
+  Properties new_props(new_graph);
+
+  // Update vertex properties with remapped indices
+
+  for (auto &[key, val] : gb.props.vertex) {
+    for (auto v : boost::make_iterator_range(boost::vertices(new_graph))) {
+      new_props.vertex[key][v] = gb.props.vertex[key][new_to_old_index_map[v]];
+    }
+  }
+
+  // Update edge properties with remapped indices
+
+  for (auto &[key, val] : gb.props.edge) {
+    for (auto new_edge : boost::make_iterator_range(boost::edges(new_graph))) {
+
+      auto old_edge =
+          boost::edge(new_to_old_index_map[boost::source(new_edge, new_graph)],
+                      new_to_old_index_map[boost::target(new_edge, new_graph)],
+                      gb.graph)
+              .first;
+
+      new_props.edge[key][new_edge] = gb.props.edge[key][old_edge];
+    }
+  }
+
+  // Update global graph properties
+
+  new_props.graph = gb.props.graph;
+  new_props.graph["removed_vertices"] = vertices;
+
+  return GraphBundle{new_graph, new_props};
 }
 
 // -------------------------------------------
 
-inline void randomly_remove_vertices_without_disconnecting(
-    GraphBundle &gb, std::size_t num_to_remove, unsigned seed) {
+inline std::vector<std::size_t>
+get_vertices_to_remove(const Graph &g, std::size_t num_to_remove,
+                       std::mt19937 &gen) {
+
+  // Each while loop:
+  // Iterate through shuffled vertices, testing each by isolating it.
+  // - If remaining graph stays connected, add vertex to removal list.
+  // - else, un-isolate the vertex and proceed to next vertex.
+  // Isolating a vertex just means removing its incident edges. This has the
+  // same topological effect as removal, but doesn't mess with vertex numbering.
+
+  Graph new_g{g};
+
+  std::vector<std::size_t> to_remove;
+
+  std::vector<std::pair<Vertex<Graph>, bool>> candidates(
+      boost::num_vertices(new_g));
+  for (std::size_t i = 0; i < boost::num_vertices(new_g); ++i) {
+    candidates[i] = {i, true};
+  }
+
+  std::vector<int> components(boost::num_vertices(new_g));
+
+  while (to_remove.size() < num_to_remove) {
+
+    std::shuffle(candidates.begin(), candidates.end(), gen);
+
+    for (auto &[v, selectable] : candidates) {
+
+      std::vector<Vertex<Graph>> cached_nbs;
+      if (selectable) {
+        for (auto nb :
+             boost::make_iterator_range(boost::adjacent_vertices(v, new_g))) {
+          cached_nbs.push_back(nb);
+        }
+      }
+
+      auto num_conn_before = boost::connected_components(new_g, &components[0]);
+      boost::clear_vertex(v, new_g);
+      auto num_conn_after = boost::connected_components(new_g, &components[0]);
+
+      bool no_longer_connected = (num_conn_after > num_conn_before + 1);
+      if (no_longer_connected) {
+        for (auto nb : cached_nbs) {
+          boost::add_edge(v, nb, new_g);
+        }
+      } else {
+        to_remove.push_back(v);
+        if (to_remove.size() == num_to_remove) {
+          break;
+        }
+      }
+
+      selectable = false;
+    }
+  }
+  return to_remove;
+}
+
+inline GraphBundle rand_prune_connected(const GraphBundle &gb,
+                                        std::size_t num_to_remove,
+                                        unsigned seed) {
+
   std::mt19937 gen(seed);
 
-  auto &g = gb.graph;
-
   if (num_to_remove == 0) {
-    return;
+    return gb;
   }
 
-  // bool = true => can select vertex, else don't select.
-  std::vector<std::pair<Vertex<Graph>, bool>> vertex_vec;
-  for (auto v : boost::make_iterator_range(boost::vertices(g))) {
-    vertex_vec.push_back({v, true});
-  }
+  std::vector<std::size_t> to_remove =
+      get_vertices_to_remove(gb.graph, num_to_remove, gen);
 
-  // boilerplate for using boost connected components.
-  std::vector<int> components(boost::num_vertices(g));
-
-  std::size_t num_removed = 0;
-
-  std::vector<std::size_t> to_actually_remove;
-
-  while (true) {
-
-    // unsuccessful exit flag
-    bool none_left_to_select = true;
-    bool end_while = false;
-
-    std::shuffle(vertex_vec.begin(), vertex_vec.end(), gen);
-
-    for (std::size_t i = 0; i < vertex_vec.size(); ++i) {
-
-      if (vertex_vec[i].second) {
-
-        none_left_to_select = false;
-
-        auto v = vertex_vec[i].first;
-
-        // Caching neighbors in-case restoration is necessary
-        std::vector<Vertex<Graph>> nbs;
-        for (auto nb :
-             boost::make_iterator_range(boost::adjacent_vertices(v, g))) {
-          nbs.push_back(nb);
-        }
-
-        std::size_t num_connected_before =
-            boost::connected_components(g, &components[0]);
-
-        // Don't actually remove vertex, just incident edges. Has same effect
-        // on connectivity without screwing up vertex indexing.
-        boost::clear_vertex(v, g);
-
-        std::size_t num_connected_after =
-            boost::connected_components(g, &components[0]);
-
-        // clearing vertex implicitly introduces one more component, so just
-        // check it doesn't increase by more than 1.
-
-        if (num_connected_after > num_connected_before + 1) {
-
-          for (auto nb : nbs) {
-            boost::add_edge(v, nb, g);
-          }
-        } else {
-
-          ++num_removed;
-          to_actually_remove.push_back(vertex_vec[i].first);
-
-          if (num_removed == num_to_remove) {
-
-            end_while = true;
-            break;
-          }
-        }
-
-        vertex_vec[i].second = false;
-      }
-    }
-
-    if (end_while) {
-      break;
-    }
-
-    if (none_left_to_select) {
-      throw std::runtime_error(
-          "Unable to achieve given density without disconnecting graph.");
-    }
-  }
-
-  remove_vertices(gb, to_actually_remove);
-  gb["transforms"].back()["removed_vertices_seed"] = seed;
+  GraphBundle result = remove_vertices(gb, to_remove);
+  return result;
 }
 
 // -------------------------------------------
 
-inline void randomly_remove_vertices_without_disconnecting(
-    GraphBundle &gb, double fraction_to_remove, unsigned seed) {
+inline GraphBundle rand_prune_connected(const GraphBundle &gb,
+                                        double fraction_to_remove,
+                                        unsigned seed) {
 
   std::size_t num_to_remove = static_cast<std::size_t>(
       fraction_to_remove * boost::num_vertices(gb.graph));
 
-  randomly_remove_vertices_without_disconnecting(gb, num_to_remove, seed);
+  GraphBundle result = rand_prune_connected(gb, num_to_remove, seed);
+  return result;
 }
 
 // ==== Edges ====
 
-inline void randomly_remove_edges_without_disconnecting(
-    GraphBundle &gb, std::size_t num_to_remove, unsigned seed) {
+inline GraphBundle
+remove_edges(const GraphBundle &gb,
+             const std::vector<std::vector<std::size_t>> &edges) {
 
-  std::mt19937 gen(seed);
+  GraphBundle new_gb{gb};
 
-  auto &g = gb.graph;
-
-  if (num_to_remove == 0) {
-    return;
+  for (auto e : edges) {
+    boost::remove_edge(e[0], e[1], new_gb.graph);
   }
 
-  std::size_t original_num_edges = boost::num_edges(g);
-
-  // bool = true => can select edge, else don't select.
-  std::vector<std::pair<Edge<Graph>, bool>> edge_vec(boost::num_edges(g));
-  for (auto edge : boost::make_iterator_range(boost::edges(g))) {
-    edge_vec.push_back({edge, true});
-  }
-
-  std::vector<std::size_t> components(boost::num_vertices(g));
-
-  std::size_t num_removed = 0;
-
-  std::vector<std::array<std::size_t, 2>> removed_edges;
-  while (num_removed < num_to_remove) {
-
-    bool none_left_to_select = true;
-
-    std::shuffle(edge_vec.begin(), edge_vec.end(), gen);
-
-    for (std::size_t i = 0; i < edge_vec.size(); ++i) {
-
-      if (edge_vec[i].second) {
-
-        // unsuccessful exit flag
-        none_left_to_select = false;
-
-        auto e = edge_vec[i].first;
-
-        std::size_t num_connected_before =
-            boost::connected_components(g, &components[0]);
-
-        boost::remove_edge(e, g);
-
-        std::size_t num_connected_after =
-            boost::connected_components(g, &components[0]);
-
-        if (num_connected_after > num_connected_before) {
-          boost::add_edge(e.m_source, e.m_target, g);
-        } else {
-          ++num_removed;
-          removed_edges.push_back({{e.m_source, e.m_target}});
-          if (num_removed == num_to_remove) {
-            return;
-          }
-        }
-
-        edge_vec[i].second = false;
-      }
-    }
-
-    if (none_left_to_select) {
-      throw std::runtime_error(
-          "Unable to achieve given density without disconnecting graph.");
-    }
-  }
-
-  nlohmann::json transform_metadata;
-  transform_metadata["type"] = "remove_edges";
-  transform_metadata["removed_edges"] = removed_edges;
-  transform_metadata["removed_edges_count"] = removed_edges.size();
-  transform_metadata["removed_edges_seed"] = seed;
-  transform_metadata["removed_edges_frac"] =
-      static_cast<double>(num_to_remove) / original_num_edges;
-
-  gb["transforms"].push_back(transform_metadata);
+  new_gb.props.graph["removed_edges"] = edges;
+  return new_gb;
 }
 
 // -------------------------------------------
 
-inline void randomly_remove_edges_without_disconnecting(
-    GraphBundle &gb, double fraction_to_remove, unsigned seed) {
+inline GraphBundle rand_prune_edges_connected(const GraphBundle &gb,
+                                              std::size_t num_to_remove,
+                                              unsigned seed) {
+
+  std::mt19937 gen(seed);
+
+  GraphBundle new_gb{gb};
+
+  if (num_to_remove == 0) {
+    return gb;
+  }
+
+  // .second = true => can select edge, else can't select it
+  std::vector<std::pair<Edge<Graph>, bool>> edge_vec(
+      boost::num_edges(new_gb.graph));
+  for (auto edge : boost::make_iterator_range(boost::edges(new_gb.graph))) {
+    edge_vec.push_back({edge, true});
+  }
+
+  std::vector<std::size_t> components(boost::num_vertices(new_gb.graph));
+
+  std::vector<std::vector<std::size_t>> removed_edges;
+
+  while (removed_edges.size() < num_to_remove) {
+
+    std::shuffle(edge_vec.begin(), edge_vec.end(), gen);
+
+    for (auto &[e, selectable] : edge_vec) {
+
+      if (selectable) {
+
+        auto num_conn_before =
+            boost::connected_components(new_gb.graph, &components[0]);
+        boost::remove_edge(e, new_gb.graph);
+        auto num_conn_after =
+            boost::connected_components(new_gb.graph, &components[0]);
+
+        if (num_conn_after > num_conn_before) {
+          boost::add_edge(e.m_source, e.m_target, new_gb.graph);
+        } else {
+          removed_edges.push_back({{e.m_source, e.m_target}});
+
+          if (removed_edges.size() == num_to_remove) {
+            break;
+          }
+        }
+        selectable = false;
+      }
+    }
+  }
+
+  new_gb.props.graph["removed_edges"] = removed_edges;
+  return new_gb;
+}
+
+// -------------------------------------------
+
+inline GraphBundle rand_prune_edges_connected(const GraphBundle &gb,
+                                              double fraction_to_remove,
+                                              unsigned seed) {
 
   std::size_t num_to_remove =
       static_cast<std::size_t>(fraction_to_remove * boost::num_edges(gb.graph));
 
-  randomly_remove_edges_without_disconnecting(gb, num_to_remove, seed);
-}
-
-// -------------------------------------------
-
-inline void remove_edges(GraphBundle &gb,
-                         const std::vector<std::array<std::size_t, 2>> &edges) {
-
-  std::size_t original_num_edges = boost::num_edges(gb.graph);
-
-  for (auto e : edges) {
-    boost::remove_edge(e[0], e[1], gb.graph);
-  }
-
-  nlohmann::json transform_metadata;
-  transform_metadata["type"] = "remove_edges";
-  transform_metadata["removed_edges"] = edges;
-  transform_metadata["removed_edges_count"] = edges.size();
-  transform_metadata["removed_edges_frac"] =
-      static_cast<double>(edges.size()) / original_num_edges;
-
-  gb["transforms"].push_back(transform_metadata);
+  return rand_prune_edges_connected(gb, num_to_remove, seed);
 }
 
 } // namespace gl

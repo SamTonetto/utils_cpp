@@ -9,6 +9,8 @@
 #include "graph/graph.hpp"
 #include "graph/properties.hpp"
 
+#include "print.hpp"
+
 #include <fstream>
 #include <unordered_map>
 #include <vector>
@@ -125,7 +127,7 @@ struct GraphWriter {
 /**
  * A basic dot writer that includes position information if it exists.
  */
-inline void to_dot(const GraphBundle &gb, const std::string &filename) {
+inline void to_dot(GraphBundle &gb, const std::string &filename) {
 
   gl::GraphWriter gw(gb.graph);
 
@@ -133,9 +135,11 @@ inline void to_dot(const GraphBundle &gb, const std::string &filename) {
   gw.add_vertex_property("shape", "circle");
   gw.add_edge_property("penwidth", "2");
 
-  if (gb.vertex.contains("position")) {
+  if (gb.props.vertex.contains("position")) {
     gw.add_vertex_property("pin", "true");
-    gl::VertexMap<std::vector<double>> pos = gb.vertex["position"];
+
+    gl::VertexMap<std::vector<double>> pos = gb.props.vertex["position"];
+
     for (auto [v, p] : pos) {
       gw.vertex_props[v]["pos"] =
           "\"" + std::to_string(p[0]) + "," + std::to_string(p[1]) + "!" + "\"";
