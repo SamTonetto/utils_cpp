@@ -50,7 +50,7 @@ option(BUILD_DOCS "Build docs" FALSE)
 
 if(BUILD_DOCS)
   if(DOXYGEN_FOUND)
-    message(STATUS "utils_cpp -- ${Green}SUCCESS: Doxygen found${ColorReset}")
+    message(STATUS "${PROJECT_NAME} -- ${Green}SUCCESS: Doxygen found${ColorReset}")
 
 
     # Copy README.md to use as Doxygen mainpage
@@ -61,7 +61,7 @@ if(BUILD_DOCS)
 
     # Set input and output files
     set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in)
-    message(STATUS "utils_cpp -- DOXYGEN_IN = ${DOXYGEN_IN}")
+    message(STATUS "${PROJECT_NAME} -- DOXYGEN_IN = ${DOXYGEN_IN}")
 
     # Configure Doxyfile
     configure_file(${DOXYGEN_IN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
@@ -72,7 +72,7 @@ if(BUILD_DOCS)
       COMMENT "Generating API documentation with Doxygen"
       VERBATIM)
   else(DOXYGEN_FOUND)
-    message(STATUS "utils_cpp -- ${Red}FAILURE: Doxygen not found. Doxygen must be installed to generate documentation${ColorReset}")
+    message(STATUS "${PROJECT_NAME} -- ${Red}FAILURE: Doxygen not found. Doxygen must be installed to generate documentation${ColorReset}")
   endif(DOXYGEN_FOUND)
 endif(BUILD_DOCS)
 # ------ End Documentation ------
@@ -88,17 +88,17 @@ set(b "r" CACHE STRING "Build type: 'r' for Release, 'd' for Debug")
 
 # --- Map user input to CMake build types
 if(${b} STREQUAL "r")
-  message(STATUS "utils_cpp -- Build type set to ${ColorBold}${Green}Release${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- Build type set to ${ColorBold}${Green}Release${ColorReset}")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type set to Release" FORCE)
 elseif(${b} STREQUAL "d")
-  message(STATUS "utils_cpp -- Build type set to ${ColorBold}${Yellow}Debug${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- Build type set to ${ColorBold}${Yellow}Debug${ColorReset}")
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build type set to Debug" FORCE)
 else()
-  message(FATAL_ERROR utils_cpp -- "Invalid build type specified: ${b}. Use 'r' for Release, 'd' for Debug.")
+  message(FATAL_ERROR ${PROJECT_NAME} -- "Invalid build type specified: ${b}. Use 'r' for Release, 'd' for Debug.")
 endif()
 # ================ End Build Type ================
 
-# ================ Build utils_cpp ================
+# ================ Build ${PROJECT_NAME} ================
 find_package(Boost REQUIRED COMPONENTS graph)
 if (Boost_FOUND)
   message(STATUS "graphlib_cpp -- ${Green}SUCCESS: Boost found${ColorReset}")
@@ -111,22 +111,26 @@ endif()
 
 
 # Define library as header-only, but link to boost graph.
-add_library(utils_cpp INTERFACE)
-target_include_directories(utils_cpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/external)
-target_link_libraries(utils_cpp INTERFACE Boost::graph)
-# ================ End Build utils_cpp ================
+add_library(${PROJECT_NAME} INTERFACE)
+
+target_include_directories(${PROJECT_NAME} INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external>)
+
+target_link_libraries(${PROJECT_NAME} INTERFACE Boost::graph)
+# ================ End Build ${PROJECT_NAME} ================
 
 
 option(BUILD_DEMOS "Build demos" FALSE)
 option(BUILD_TESTS "Build tests" FALSE)
 
 if(BUILD_DEMOS)
-  message(STATUS "utils_cpp -- ${Blue}Descending into demos${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- ${Blue}Descending into demos${ColorReset}")
   add_subdirectory(demos)
-  message(STATUS "utils_cpp -- ${Blue}Finished with demos${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- ${Blue}Finished with demos${ColorReset}")
 endif()
 if(BUILD_TESTS)
-  message(STATUS "utils_cpp -- ${Blue}Descending into tests${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- ${Blue}Descending into tests${ColorReset}")
   add_subdirectory(tests)
-  message(STATUS "utils_cpp -- ${Blue}Finished with tests${ColorReset}")
+  message(STATUS "${PROJECT_NAME} -- ${Blue}Finished with tests${ColorReset}")
 endif()

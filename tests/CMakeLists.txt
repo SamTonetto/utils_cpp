@@ -1,11 +1,11 @@
 file(GLOB TESTS "*.cpp")
-message(STATUS "utils_cpp -- Configuring Tests")
+message(STATUS "${PROJECT_NAME} -- Configuring Tests")
 foreach(test ${TESTS})
   get_filename_component(test_name ${test} NAME_WE)
   add_executable(${test_name} ${test} ${SOURCES})
-  target_include_directories(${test_name} PRIVATE ../include ../external)
+  target_link_libraries(${test_name} ${PROJECT_NAME})
   add_test(NAME ${test_name} COMMAND ${test_name})
-  message(STATUS "utils_cpp --   ${test_name}... ${Green}OK${ColorReset}")
+  message(STATUS "${PROJECT_NAME} --   ${test_name}... ${Green}OK${ColorReset}")
 endforeach()
 
 
