@@ -13,6 +13,7 @@ int main() {
   // Conversion to boost adjmat - interface seems more like a normal boost graph
   // interface than a matrix interface.
   auto boost_adjmat = gl::construct_boost_adjacency_matrix(gb.graph);
+
   std::cout << "Boost adjmat: " << std::endl;
   for (std::size_t i = 0; i < boost::num_vertices(boost_adjmat); ++i) {
     std::cout << "Vertex " << i << " is adjacent to: ";

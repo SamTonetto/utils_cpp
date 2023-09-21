@@ -4,6 +4,8 @@
 #include "metaprogramming/overload.hpp"
 #include "print.hpp"
 
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <variant>
 
@@ -16,8 +18,9 @@ struct GraphProp {
                std::vector<std::vector<double>>>
       p;
 
+  // ------ Constructors ------
+  GraphProp() = default;
   GraphProp(const std::string &s) : p{s} {}
-
   GraphProp(const char *s) : p{std::string{s}} {}
 
   template <Arithmetic T>
@@ -46,7 +49,45 @@ struct GraphProp {
     }
   }
 
-  GraphProp() = default;
+  // ------ Assignment ----
+  GraphProp &operator=(const std::string &s) {
+    p = s;
+    return *this;
+  }
+
+  GraphProp &operator=(const char *s) {
+    p = std::string{s};
+    return *this;
+  }
+
+  template <Arithmetic T>
+  GraphProp &operator=(const T &n) {
+    p.template emplace<double>(static_cast<double>(n));
+    return *this;
+  }
+
+  template <Arithmetic T>
+  GraphProp &operator=(const std::vector<T> &v) {
+    p.template emplace<std::vector<double>>();
+    for (const auto &e : v) {
+      std::get<std::vector<double>>(p).push_back(static_cast<double>(e));
+    }
+    return *this;
+  }
+
+  template <Arithmetic T>
+  GraphProp &operator=(const std::vector<std::vector<T>> &v) {
+    p.template emplace<std::vector<std::vector<double>>>();
+    for (const auto &e : v) {
+      std::vector<double> tmp;
+      tmp.reserve(e.size());
+      for (const auto &ee : e) {
+        tmp.push_back(static_cast<double>(ee));
+      }
+      std::get<std::vector<std::vector<double>>>(p).push_back(tmp);
+    }
+    return *this;
+  }
 
   template <typename T>
   operator const T &() const {

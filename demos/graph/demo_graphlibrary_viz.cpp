@@ -15,8 +15,6 @@ std::string dir_path = "./dot_output";
 // Helper function to write a graph to a file in the dot format
 void write_to_file(const std::string &filename, const gl::GraphBundle &gb) {
 
-  auto &g = gb.graph;
-
   // Create the output directory if it doesn't exist.
   if (!std::filesystem::exists(dir_path)) {
     bool success = std::filesystem::create_directory(dir_path);
@@ -27,8 +25,8 @@ void write_to_file(const std::string &filename, const gl::GraphBundle &gb) {
   }
 
   boost::dynamic_properties dp;
-  dp.property("node_id",
-              boost::get(boost::vertex_index, g)); // This line is compulsory
+  dp.property("node_id", boost::get(boost::vertex_index,
+                                    gb.graph)); // This line is compulsory
 
   // Create maps for all the main graphviz features
   gl::VertexMap<std::string> positionMap; // Position of vertices.
@@ -56,7 +54,7 @@ void write_to_file(const std::string &filename, const gl::GraphBundle &gb) {
   std::ofstream ofs(dir_path + "/" + filename);
 
   // The function that actually writes the graph to the file.
-  boost::write_graphviz_dp(ofs, g, dp);
+  boost::write_graphviz_dp(ofs, gb.graph, dp);
 }
 
 int main() {

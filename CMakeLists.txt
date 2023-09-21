@@ -112,7 +112,7 @@ endif()
 
 # Define library as header-only, but link to boost graph.
 add_library(utils_cpp INTERFACE)
-target_include_directories(utils_cpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(utils_cpp INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/external)
 target_link_libraries(utils_cpp INTERFACE Boost::graph)
 # ================ End Build utils_cpp ================
 
