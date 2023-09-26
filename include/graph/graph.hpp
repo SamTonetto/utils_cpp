@@ -371,6 +371,22 @@ using EdgeSet =
 template <typename GraphType = Graph>
 using VertexSet = typename std::unordered_set<Vertex<GraphType>>;
 
+// ---- Loading from Edgelist ----
+
+inline Graph
+from_edgelist(const std::vector<std::vector<std::size_t>> &edgelist) {
+
+  // Each element of edgelist should be 2-element vector (source, target).
+
+  Graph g;
+
+  for (const auto &edge : edgelist) {
+    add_edge(edge[0], edge[1], g);
+  }
+
+  return g;
+}
+
 } // namespace gl
 
 // ---- Output ----
