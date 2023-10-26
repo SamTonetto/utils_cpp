@@ -19,7 +19,7 @@ TEST_CASE("basic tests") {
 
   SUBCASE("random_int [0,10)") {
     for (int i = 0; i < 10; ++i) {
-      auto r = utils::random_int(gen, 0, 10);
+      auto r = utils::random_int(0, 10, gen);
       CHECK(r >= 0);
       CHECK(r <= 10);
     }
@@ -35,7 +35,7 @@ TEST_CASE("basic tests") {
 
   SUBCASE("random_double [0 10)") {
     for (int i = 0; i < 10; ++i) {
-      auto r = utils::random_double(gen, 0, 10);
+      auto r = utils::random_double(0, 10, gen);
       CHECK(r >= 0);
       CHECK(r < 10);
     }

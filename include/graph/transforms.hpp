@@ -11,14 +11,13 @@
 #include "graph/graph.hpp"
 #include "graph/properties.hpp"
 #include "graph/transforms_def.hpp"
+#include "random.hpp"
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>
 
 #include "print.hpp"
-
-#include <random>
 
 namespace utils {
 namespace gl {
@@ -101,9 +100,10 @@ inline GraphBundle remove_vertices(const GraphBundle &gb,
 
 // -------------------------------------------
 
+template <typename RandomGenerator>
 inline std::vector<std::size_t>
 get_vertices_to_remove(const Graph &g, std::size_t num_to_remove,
-                       std::mt19937 &gen) {
+                       RandomGenerator &&gen) {
 
   // Each while loop:
   // Iterate through shuffled vertices, testing each by isolating it.
@@ -273,6 +273,76 @@ inline GraphBundle rand_prune_edges_connected(const GraphBundle &gb,
       static_cast<std::size_t>(fraction_to_remove * boost::num_edges(gb.graph));
 
   return rand_prune_edges_connected(gb, num_to_remove, seed);
+}
+
+inline Graph
+relabel_vertices(const Graph &g,
+                 const std::unordered_map<std::size_t, std::size_t> &mapping) {
+
+  std::size_t largest_mapped_index = 0;
+  for (const auto &[old_index, new_index] : mapping) {
+    if (old_index < boost::num_vertices(g) &&
+        new_index > largest_mapped_index) {
+      largest_mapped_index = new_index;
+    }
+  }
+
+  if (largest_mapped_index + 1 < boost::num_vertices(g)) {
+    throw std::runtime_error("Mapping does not cover all vertices");
+  }
+
+  Graph new_graph;
+  for (std::size_t i = 0; i < largest_mapped_index; ++i) {
+    boost::add_vertex(new_graph);
+  }
+
+  for (auto e : boost::make_iterator_range(boost::edges(g))) {
+    auto source = boost::source(e, g);
+    auto target = boost::target(e, g);
+
+    auto new_source = mapping.at(source);
+    auto new_target = mapping.at(target);
+
+    boost::add_edge(new_source, new_target, new_graph);
+  }
+
+  return new_graph;
+}
+
+template <typename RandomGenerator>
+Graph shuffle_vertex_labels(const Graph &g, RandomGenerator &&gen) {
+
+  auto shuffled = shuffled_iota(boost::num_vertices(g), gen);
+  std::unordered_map<std::size_t, std::size_t> mapping;
+  for (std::size_t i = 0; i < boost::num_vertices(g); ++i) {
+    mapping[i] = shuffled[i];
+  }
+
+  return relabel_vertices(g, mapping);
+}
+
+inline Graph shuffle_vertex_labels(const Graph &g, unsigned seed) {
+  std::mt19937 gen(seed);
+  return shuffle_vertex_labels(g, gen);
+}
+
+inline std::pair<Graph, std::unordered_map<std::size_t, std::size_t>>
+contiguize(const Graph &g) {
+
+  std::unordered_map<std::size_t, std::size_t> mapping, reverse_mapping;
+
+  std::size_t new_index = 0;
+  for (const auto &v : boost::make_iterator_range(boost::vertices(g))) {
+    if (boost::degree(v, g) == 0) {
+      continue;
+    }
+
+    mapping[v] = new_index;
+    reverse_mapping[new_index] = v;
+    ++new_index;
+  }
+
+  return {relabel_vertices(g, mapping), reverse_mapping};
 }
 
 } // namespace gl

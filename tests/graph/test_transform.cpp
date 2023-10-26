@@ -92,3 +92,64 @@ TEST_CASE("test remove edges by list") {
   CHECK(new_gb["removed_edges"] ==
         std::vector<std::vector<double>>{{0, 1}, {1, 2}, {1, 4}, {6, 7}});
 }
+
+TEST_CASE("gl::relabel_vertices") {
+
+  gl::Graph g;
+
+  SUBCASE("valid mapping") {
+
+    boost::add_edge(0, 1, g);
+    boost::add_edge(1, 2, g);
+
+    std::unordered_map<std::size_t, std::size_t> mapping = {
+        {0, 2}, {1, 0}, {2, 1}};
+
+    gl::Graph new_g = gl::relabel_vertices(g, mapping);
+
+    CHECK(boost::edge(2, 0, new_g).second);
+    CHECK(boost::edge(0, 1, new_g).second);
+  }
+
+  SUBCASE("incomplete mapping") {
+
+    boost::add_edge(0, 1, g);
+    boost::add_edge(1, 2, g);
+
+    std::unordered_map<std::size_t, std::size_t> mapping = {{0, 2}, {1, 0}};
+    CHECK_THROWS(gl::relabel_vertices(g, mapping));
+  }
+
+  SUBCASE("mapping with larger index") {
+
+    boost::add_edge(0, 1, g);
+
+    std::unordered_map<std::size_t, std::size_t> mapping = {{0, 2}, {1, 3}};
+
+    gl::Graph new_graph = gl::relabel_vertices(g, mapping);
+
+    CHECK(boost::num_vertices(new_graph) == 4);
+    CHECK(boost::edge(2, 3, new_graph).second);
+  }
+
+  SUBCASE("empty graph") {
+
+    std::unordered_map<std::size_t, std::size_t> mapping;
+    gl::Graph new_g = gl::relabel_vertices(g, mapping);
+
+    CHECK(boost::num_vertices(new_g) == 0);
+  }
+
+  SUBCASE("non-existing vertex in mapping") {
+
+    boost::add_edge(0, 1, g);
+
+    std::unordered_map<std::size_t, std::size_t> mapping = {
+        {0, 2}, {1, 3}, {2, 4}};
+
+    gl::Graph new_g = gl::relabel_vertices(g, mapping);
+
+    CHECK(boost::num_vertices(new_g) == 4);
+    CHECK(boost::edge(2, 3, new_g).second);
+  }
+}
