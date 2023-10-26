@@ -46,9 +46,10 @@ jobs:
     - name: Make build script executable
       run: chmod +x build-run-cov.sh
 
+    # Decide not to run gcc until its bug is fixed.
     # gcc
-    - name: Run build/run/test/coverage script
-      run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
+    # - name: Run build/run/test/coverage script
+    #  run: TC=gcc ${{github.workspace}}/./build-run-cov.sh
 
     # clang
     - name: Run build/run/test/coverage script
