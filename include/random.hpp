@@ -103,7 +103,7 @@ std::vector<std::size_t> shuffled_iota(std::size_t size,
 
   std::vector<std::size_t> indices(size);
   std::iota(indices.begin(), indices.end(), 0);
-  random_shuffle(indices.begin(), indices.end(), gen);
+  utils::random_shuffle(indices.begin(), indices.end(), gen);
   return indices;
 }
 
