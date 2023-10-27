@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <iostream>
 #include <random>
+#include <unordered_map>
 
 namespace utils {
 
