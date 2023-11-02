@@ -21,6 +21,11 @@ std::vector<std::string> split(std::string_view strv,
                                std::string_view delimiter = " ");
 
 /**
+ * A python-like startswith function.
+ */
+bool startswith(std::string_view strv, std::string_view prefix);
+
+/**
  * A python-like join function.
  */
 std::string join(const std::vector<std::string> &strings,
@@ -61,6 +66,20 @@ inline std::vector<std::string> split(std::string_view strv,
   }
 
   return result;
+}
+
+inline bool startswith(std::string_view strv, std::string_view prefix) {
+
+  if (strv.size() < prefix.size())
+    return false;
+
+  for (size_t i = 0; i < prefix.size(); ++i) {
+    if (strv[i] != prefix[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 inline std::string join(const std::vector<std::string> &strings,

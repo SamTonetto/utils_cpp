@@ -68,3 +68,13 @@ TEST_CASE("convertible to long long") {
   CHECK_FALSE(utils::convertible_to_long_long("0. 5"));
   CHECK_FALSE(utils::convertible_to_long_long("02.5"));
 }
+
+TEST_CASE("test startswith") {
+
+  CHECK(utils::startswith("Hello, World", "Hello"));
+  CHECK(utils::startswith("Hello, World", "Hello,"));
+  CHECK(utils::startswith("Hello, World", "Hello, "));
+  CHECK(utils::startswith("Hello, World", "Hello, W"));
+
+  CHECK(utils::startswith("Hello, World", "h") == false);
+}
