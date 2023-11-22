@@ -18,7 +18,7 @@ namespace utils {
  * A python-like split function.
  */
 std::vector<std::string> split(std::string_view strv,
-                               std::string_view delimiter = " ");
+                               std::string_view delimiter);
 
 /**
  * A python-like startswith function.
@@ -39,8 +39,8 @@ std::string join(const std::vector<std::string> &strings,
 bool convertible_to_double(const std::string &s);
 
 /**
- * Check if a string is convertible to a long long. No whitespace is allowed, no
- * decimal points (unless decimal part is zero), and no extraneous leading
+ * Check if a string is convertible to a long long. No whitespace is allowed,
+ * no decimal points (unless decimal part is zero), and no extraneous leading
  * zeros.
  */
 bool convertible_to_long_long(const std::string &s);
@@ -50,19 +50,35 @@ bool convertible_to_long_long(const std::string &s);
 // ==============================
 
 inline std::vector<std::string> split(std::string_view strv,
-                                      std::string_view delimiter) {
+                                      std::string_view delimiter = " ") {
+
+  if (delimiter.empty()) {
+    throw std::invalid_argument("Delimiter cannot be an empty string.");
+  }
 
   std::vector<std::string> result;
   size_t pos;
 
-  while ((pos = strv.find(delimiter)) != std::string_view::npos) {
-    result.emplace_back(strv.substr(0, pos));
-    strv.remove_prefix(pos + delimiter.size()); // remove delimiter itself
-  }
+  if (delimiter.size() == 1 && std::isspace(delimiter[0])) {
 
-  // add what remains
-  if (!strv.empty()) {
-    result.emplace_back(strv);
+    std::size_t start = 0;
+    while ((pos = strv.find_first_not_of(" \t\n\r\f\v", start)) !=
+           std::string_view::npos) {
+      start = strv.find_first_of(" \t\n\r\f\v", pos);
+      result.emplace_back(strv.substr(pos, start - pos));
+    }
+
+  } else {
+
+    while ((pos = strv.find(delimiter)) != std::string_view::npos) {
+      result.emplace_back(strv.substr(0, pos));
+      strv.remove_prefix(pos + delimiter.size()); // remove delimiter itself
+    }
+
+    // add what remains
+    if (!strv.empty()) {
+      result.emplace_back(strv);
+    }
   }
 
   return result;

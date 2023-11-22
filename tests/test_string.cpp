@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "print.hpp"
 #include "string.hpp"
 
 TEST_CASE("split") {
@@ -15,6 +16,11 @@ TEST_CASE("split") {
   CHECK(utils::split("no delimiters here") ==
         std::vector<std::string>{"no", "delimiters", "here"});
   CHECK(utils::split("", ",") == std::vector<std::string>{});
+
+  CHECK(utils::split("double  spaced  words   ") ==
+        std::vector<std::string>{"double", "spaced", "words"});
+
+  CHECK_THROWS(utils::split("double  spaced  word", ""));
 }
 
 TEST_CASE("join") {
