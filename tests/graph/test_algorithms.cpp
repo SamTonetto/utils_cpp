@@ -106,3 +106,15 @@ TEST_CASE("floyd warshall bitadjmat") {
     CHECK(distances == expected);
   }
 }
+
+TEST_CASE("graph coloring") {
+  auto [graph, props] = gl::grid(3, 3);
+
+  gl::VertexMap<std::size_t> color_map =
+      gl::graph_coloring(graph, gl::graph_coloring_strategy::LARGEST_FIRST);
+
+  gl::VertexMap<std::size_t> correct = {{0, 0}, {2, 0}, {4, 0}, {6, 0}, {8, 0},
+                                        {1, 1}, {3, 1}, {5, 1}, {7, 1}};
+
+  CHECK(color_map == correct);
+}

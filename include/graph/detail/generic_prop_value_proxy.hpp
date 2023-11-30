@@ -148,7 +148,7 @@ struct GenericPropValueProxy {
 
   template <typename T>
   operator T &() {
-    std::get<MapType<T, GraphType>>(gp.p)[k];
+    return std::get<MapType<T, GraphType>>(gp.p)[k];
   }
 
   template <typename K, template <typename...> typename M, typename G>
