@@ -164,7 +164,7 @@ inline GraphBundle rand_prune_connected(const GraphBundle &gb,
                                         std::size_t num_to_remove,
                                         unsigned seed) {
 
-  std::mt19937 gen(seed);
+  std::mt19937_64 gen(seed);
 
   if (num_to_remove == 0) {
     return gb;
@@ -212,7 +212,7 @@ inline GraphBundle rand_prune_edges_connected(const GraphBundle &gb,
                                               std::size_t num_to_remove,
                                               unsigned seed) {
 
-  std::mt19937 gen(seed);
+  std::mt19937_64 gen(seed);
 
   GraphBundle new_gb{gb};
 
@@ -309,8 +309,7 @@ relabel_vertices(const Graph &g,
   return new_graph;
 }
 
-template <typename RandomGenerator>
-Graph shuffle_vertex_labels(const Graph &g, RandomGenerator &&gen) {
+inline Graph shuffle_vertex_labels(const Graph &g, std::mt19937_64 &gen) {
 
   auto shuffled = shuffled_iota(boost::num_vertices(g), gen);
   std::unordered_map<std::size_t, std::size_t> mapping;
@@ -322,7 +321,7 @@ Graph shuffle_vertex_labels(const Graph &g, RandomGenerator &&gen) {
 }
 
 inline Graph shuffle_vertex_labels(const Graph &g, unsigned seed) {
-  std::mt19937 gen(seed);
+  std::mt19937_64 gen(seed);
   return shuffle_vertex_labels(g, gen);
 }
 
