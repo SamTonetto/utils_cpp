@@ -51,6 +51,8 @@ TEST_CASE("Test thread safe queue push and try_pop") {
       }
     });
 
+    producer.join();
+
     std::thread consumer([&queue, &sum] {
       for (int i = 0; i < 100; ++i) {
         while (auto val = queue.try_pop()) {
@@ -59,7 +61,6 @@ TEST_CASE("Test thread safe queue push and try_pop") {
       }
     });
 
-    producer.join();
     consumer.join();
 
     CHECK(sum == 5050); // Sum of first 100 natural numbers

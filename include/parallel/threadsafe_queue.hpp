@@ -81,12 +81,12 @@ public:
    * @details If the queue is empty, this operation will block until
    * an item becomes available due to a call to push(). Once an item
    * is available or if the queue was not empty to begin with,
-   * it removes the front item from the queue and stores it in 'value'.
+   * it removes the front item from the queue.
    *
    * @param value Reference to a T where the popped value will be stored.
-   * @return std::shared_ptr<T> Shared pointer to the popped value.
+   * @return void
    */
-  std::shared_ptr<T> wait_and_pop(T &value);
+  void wait_and_pop(T &value);
 
   /**
    * @brief Pushes a new value to the end of the queue.
@@ -193,6 +193,11 @@ template <typename T>
 std::shared_ptr<T> threadsafe_queue<T>::wait_and_pop() {
   std::unique_ptr<node> const old_head = wait_pop_head();
   return old_head->data;
+}
+
+template <typename T>
+void threadsafe_queue<T>::wait_and_pop(T &value) {
+  std::unique_ptr<node> const old_head = wait_pop_head(value);
 }
 
 template <typename T>

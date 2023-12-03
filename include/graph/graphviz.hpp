@@ -135,6 +135,9 @@ inline void to_dot(GraphBundle &gb, const std::string &filename) {
   gw.add_vertex_property("shape", "circle");
   gw.add_edge_property("penwidth", "2");
 
+  std::cout << "gb.props.vertex.contains(\"position\") = "
+            << gb.props.vertex.contains("position") << std::endl;
+
   if (gb.props.vertex.contains("position")) {
     gw.add_vertex_property("pin", "true");
 
@@ -145,6 +148,23 @@ inline void to_dot(GraphBundle &gb, const std::string &filename) {
           "\"" + std::to_string(p[0]) + "," + std::to_string(p[1]) + "!" + "\"";
     }
   }
+
+  std::ofstream ofs(filename);
+  gw.write(ofs);
+  ofs.close();
+}
+
+/**
+ * A basic dot writer that includes position information if it exists.
+ */
+template <typename GraphType>
+void to_dot(GraphType &g, const std::string &filename) {
+
+  gl::GraphWriter gw(g);
+
+  gw.add_graph_property("splines", "true");
+  gw.add_vertex_property("shape", "circle");
+  gw.add_edge_property("penwidth", "2");
 
   std::ofstream ofs(filename);
   gw.write(ofs);

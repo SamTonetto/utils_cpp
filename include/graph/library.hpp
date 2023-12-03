@@ -464,8 +464,8 @@ inline GraphBundle kagome(std::size_t nrows, std::size_t ncols) {
   // Add vertices
 
   VertexMap<std::vector<double>> positions;
-  for (std::size_t r = 0; r < nrows + 1; ++r) {
-    for (std::size_t c = 0; c < ncols + 1; ++c) {
+  for (std::size_t r = 0; r < 2 * nrows + 1; ++r) {
+    for (std::size_t c = 0; c < 2 * ncols + 1; ++c) {
       if (r % 2 == 1 && c % 2 == 1) {
         continue;
       }
@@ -476,8 +476,8 @@ inline GraphBundle kagome(std::size_t nrows, std::size_t ncols) {
   }
 
   // Add edges
-  for (std::size_t r = 0; r < nrows + 1; ++r) {
-    for (std::size_t c = 0; c < ncols + 1; ++c) {
+  for (std::size_t r = 0; r < 2 * nrows + 1; ++r) {
+    for (std::size_t c = 0; c < 2 * ncols + 1; ++c) {
       if (r % 2 == 0) {
         if (c > 0) {
           std::size_t source = coord_to_vertex[{c - 1, r}];
