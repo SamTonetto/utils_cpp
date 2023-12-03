@@ -373,17 +373,33 @@ using VertexSet = typename std::unordered_set<Vertex<GraphType>>;
 
 // ---- Loading from Edgelist ----
 
-inline Graph
-from_edgelist(const std::vector<std::vector<std::size_t>> &edgelist) {
-
-  // Each element of edgelist should be 2-element vector (source, target).
-
+template <typename T>
+  requires std::is_integral_v<T>
+Graph from_edgelist(const std::vector<std::vector<T>> &edgelist) {
   Graph g;
-
   for (const auto &edge : edgelist) {
     add_edge(edge[0], edge[1], g);
   }
+  return g;
+}
 
+template <typename T>
+  requires std::is_integral_v<T>
+Graph from_edgelist(const std::vector<std::array<T, 2>> &edgelist) {
+  Graph g;
+  for (const auto &edge : edgelist) {
+    add_edge(edge[0], edge[1], g);
+  }
+  return g;
+}
+
+template <typename T>
+  requires std::is_integral_v<T>
+Graph from_edgelist(const std::vector<std::pair<T, T>> &edgelist) {
+  Graph g;
+  for (const auto &edge : edgelist) {
+    add_edge(edge.first, edge.second, g);
+  }
   return g;
 }
 
