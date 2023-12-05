@@ -403,6 +403,16 @@ Graph from_edgelist(const std::vector<std::pair<T, T>> &edgelist) {
   return g;
 }
 
+template <typename T>
+  requires std::is_integral_v<T>
+std::vector<std::pair<T, T>> to_edgelist(const Graph &g) {
+  std::vector<std::pair<T, T>> edgelist;
+  for (auto e : boost::make_iterator_range(boost::edges(g))) {
+    edgelist.push_back({boost::source(e, g), boost::target(e, g)});
+  }
+  return edgelist;
+}
+
 } // namespace gl
 
 // ---- Output ----
