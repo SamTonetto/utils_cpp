@@ -126,8 +126,6 @@ TEST_CASE("test_newline_io_manip") {
     std::stringstream ss;
     ss << v;
 
-    std::cout << ss.str() << std::endl;
-
     CHECK(ss.str() == "[[{0, 1, 2, 3}, {0, 2, 3, 5}], [{0, 2}], "
                       "[{1, 2, 3, 5}, {2, 3}, {1, 2, 3}], [{3}, {}], []]");
   }
@@ -193,4 +191,21 @@ TEST_CASE("escape special chars") {
   ss << utils::escape_special_chars(false) << "hello\nworld" << '\t';
 
   CHECK(ss.str() == "hello\\nworld\\thello\nworld\t");
+}
+
+TEST_CASE("test print tuple") {
+
+  std::tuple<int, std::string, std::vector<std::tuple<int, std::string>>> t = {
+      1,
+      "hello",
+      {
+          {1, "a"},
+          {2, "b"},
+          {3, "c"},
+      }};
+
+  std::stringstream ss;
+  ss << t;
+
+  CHECK(ss.str() == "(1, hello, [(1, a), (2, b), (3, c)])");
 }

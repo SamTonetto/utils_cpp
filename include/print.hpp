@@ -165,6 +165,9 @@ std::ostream &
 operator<<(std::ostream &os,
            const std::priority_queue<T, Container, Compare> &container);
 
+template <typename... T>
+std::ostream &operator<<(std::ostream &os, const std::tuple<T...> &tup);
+
 // ========= Implementations ===========
 
 template <typename T>
@@ -289,6 +292,20 @@ template <typename T1, typename T2>
 std::ostream &operator<<(std::ostream &os, const std::pair<T1, T2> &container) {
   os << '(' << container.first << ", " << container.second << ')';
   return os;
+}
+
+template <typename TupleType, std::size_t... Index>
+std::ostream &print_tuple_helper(std::ostream &os, const TupleType &tup,
+                                 std::index_sequence<Index...>) {
+  os << "(";
+  (..., (os << (Index == 0 ? "" : ", ") << std::get<Index>(tup)));
+  os << ")";
+  return os;
+}
+
+template <typename... T>
+std::ostream &operator<<(std::ostream &os, const std::tuple<T...> &tup) {
+  return print_tuple_helper(os, tup, std::index_sequence_for<T...>{});
 }
 
 template <typename T, typename Compare>
