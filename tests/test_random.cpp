@@ -80,3 +80,14 @@ TEST_CASE("test shuffled mapping") {
                                                                  {1, 2},
                                                                  {0, 7}}));
 }
+
+TEST_CASE("test random choice") {
+
+  std::mt19937_64 gen(0);
+
+  std::vector<std::string> v = {"a", "b", "c", "d", "e", "f", "g", "h"};
+
+  auto r = utils::random_choice(v, gen);
+
+  CHECK(r == "g");
+}

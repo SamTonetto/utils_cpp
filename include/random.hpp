@@ -71,7 +71,7 @@ T random_choice(const std::vector<T> &data, std::mt19937_64 &gen) {
         "Cannot select a random element from an empty vector.");
   }
 
-  return data[random_int(0, data.size() - 1, gen)];
+  return data[random_int(0ul, data.size() - 1, gen)];
 }
 
 /**
