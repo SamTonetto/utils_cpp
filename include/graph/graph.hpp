@@ -413,12 +413,13 @@ to_edgelist(const Graph &g) {
 }
 
 } // namespace gl
+} // namespace utils
 
 // ---- Output ----
 
 template <typename GraphType, typename ValueType>
 std::ostream &operator<<(std::ostream &os,
-                         const gl::VertexMap<GraphType, ValueType> &m) {
+                         const utils::gl::VertexMap<GraphType, ValueType> &m) {
   for (auto &[vertex, value] : m) {
     os << vertex << ": " << value << '\n';
   }
@@ -427,7 +428,7 @@ std::ostream &operator<<(std::ostream &os,
 
 template <typename GraphType, typename ValueType>
 std::ostream &operator<<(std::ostream &os,
-                         const gl::EdgeMap<GraphType, ValueType> &m) {
+                         const utils::gl::EdgeMap<GraphType, ValueType> &m) {
   for (auto &[edge, value] : m) {
     os << '(' << edge.m_source << ", " << edge.m_target << "): " << value
        << '\n';
@@ -435,7 +436,7 @@ std::ostream &operator<<(std::ostream &os,
   return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os, const gl::Graph &g) {
+inline std::ostream &operator<<(std::ostream &os, const utils::gl::Graph &g) {
   for (auto v : boost::make_iterator_range(boost::vertices(g))) {
     os << v << ": ";
     for (auto nb : boost::make_iterator_range(boost::adjacent_vertices(v, g))) {
@@ -446,7 +447,7 @@ inline std::ostream &operator<<(std::ostream &os, const gl::Graph &g) {
   return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os, const gl::BiGraph &g) {
+inline std::ostream &operator<<(std::ostream &os, const utils::gl::BiGraph &g) {
   for (auto v : boost::make_iterator_range(boost::vertices(g))) {
     os << v << ": ";
     for (auto nb : boost::make_iterator_range(boost::adjacent_vertices(v, g))) {
@@ -457,7 +458,7 @@ inline std::ostream &operator<<(std::ostream &os, const gl::BiGraph &g) {
   return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os, const gl::DiGraph &g) {
+inline std::ostream &operator<<(std::ostream &os, const utils::gl::DiGraph &g) {
   for (auto v : boost::make_iterator_range(boost::vertices(g))) {
     os << v << ": ";
     for (auto nb : boost::make_iterator_range(boost::adjacent_vertices(v, g))) {
@@ -467,5 +468,3 @@ inline std::ostream &operator<<(std::ostream &os, const gl::DiGraph &g) {
   }
   return os;
 }
-
-} // namespace utils
