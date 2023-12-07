@@ -229,10 +229,31 @@ public:
   BitAdjmat &swap(const std::vector<std::vector<std::size_t>> &matching);
 
   /**
+   * Permutes the rows and columns of the adjmat inplace.
+   * @param perm permutation to apply
+   * @return reference to this adjmat
+   */
+  BitAdjmat &permute(const std::vector<std::size_t> &perm);
+
+  /**
+   * Permutes the rows and columns of the adjmat inplace.
+   * @param perm permutation to apply
+   * @return reference to this adjmat
+   */
+  BitAdjmat &permute(const std::unordered_map<std::size_t, std::size_t> &perm);
+
+  /**
    * Toggle all the entries in the adjmat 0 -> 1 and 1 -> 0.
    * @return reference to this adjmat
    */
   BitAdjmat &toggle() noexcept;
+
+  /**
+   * Performs matrix multiplication with another matrix.
+   * @param other matrix to multiply with
+   * @return result of matrix multiplication
+   */
+  BitAdjmat matmul(const BitAdjmat &other) const noexcept;
 
   /**
    * Return a bitwise-negated copy.
@@ -453,9 +474,9 @@ inline BitAdjmat::BitAdjmat(std::size_t num_vertices_)
       matrix{num_vertices_, num_uint64_per_row, 0} {}
 
 inline BitAdjmat::BitAdjmat(const Graph &g)
-    : num_vertices_{boost::num_vertices(g)} {
-  num_uint64_per_row = num_vertices_ / N + (num_vertices_ % N != 0);
-  matrix = Matrix<uint64_t>(num_vertices_, num_uint64_per_row, 0);
+    : num_vertices_{boost::num_vertices(g)},
+      num_uint64_per_row{num_vertices_ / N + (num_vertices_ % N != 0)},
+      matrix{num_vertices_, num_uint64_per_row, 0} {
 
   for (auto [ei, end] = boost::edges(g); ei != end; ++ei) {
     uint64_t i = boost::source(*ei, g);
@@ -546,6 +567,35 @@ BitAdjmat::swap(const std::vector<std::vector<std::size_t>> &matching) {
   return *this;
 }
 
+inline BitAdjmat &BitAdjmat::permute(const std::vector<std::size_t> &perm) {
+
+  BitAdjmat new_mat(num_vertices_);
+  for (std::size_t i = 0; i < num_vertices_; ++i) {
+    for (std::size_t j = i + 1; j < num_vertices_; ++j) {
+      if (get(i, j)) {
+        new_mat.set(perm[i], perm[j]);
+      }
+    }
+  }
+  *this = std::move(new_mat);
+  return *this;
+}
+
+inline BitAdjmat &
+BitAdjmat::permute(const std::unordered_map<std::size_t, std::size_t> &perm) {
+
+  BitAdjmat new_mat(num_vertices_);
+  for (std::size_t i = 0; i < num_vertices_; ++i) {
+    for (std::size_t j = i + 1; j < num_vertices_; ++j) {
+      if (get(i, j)) {
+        new_mat.set(perm.at(i), perm.at(j));
+      }
+    }
+  }
+  *this = std::move(new_mat);
+  return *this;
+}
+
 inline BitAdjmat &BitAdjmat::swap_rows(std::size_t r1, std::size_t r2) {
   auto r1_start_ = matrix[r1].begin();
   auto r1_end = matrix[r1].end();
@@ -575,6 +625,18 @@ inline BitAdjmat &BitAdjmat::toggle() noexcept {
     }
   }
   return *this;
+}
+
+inline BitAdjmat BitAdjmat::matmul(const BitAdjmat &other) const noexcept {
+  BitAdjmat result(num_vertices_);
+  for (std::size_t i = 0; i < num_vertices_; ++i) {
+    for (std::size_t j = 0; j < num_vertices_; ++j) {
+      for (std::size_t k = 0; k < num_uint64_per_row; ++k) {
+        result.matrix(i, k) |= matrix(i, k) & other.matrix(j, k);
+      }
+    }
+  }
+  return result;
 }
 
 inline BitAdjmat BitAdjmat::operator~() const noexcept {

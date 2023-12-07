@@ -111,6 +111,34 @@ TEST_CASE("swap") {
   CHECK(equal);
 }
 
+TEST_CASE("permute") {
+
+  // 0 -- 1 -- 2 -- 3
+  // Adjacency matrix is:
+  // 0 1 0 0
+  // 1 0 1 0
+  // 0 1 0 1
+  // 0 0 1 0
+  auto g = gl::path(4).graph;
+
+  gl::BitAdjmat adjmat(g);
+
+  adjmat.permute({1, 2, 3, 0});
+
+  // After permutation:
+  // 1 -- 2 -- 3 -- 0
+  // Adjacency matrix is:
+  // 0 0 0 1
+  // 0 0 1 0
+  // 0 1 0 1
+  // 1 0 1 0
+
+  std::stringstream ss;
+  ss << adjmat;
+
+  CHECK(ss.str() == "0 0 0 1\n0 0 1 0\n0 1 0 1\n1 0 1 0\n");
+}
+
 TEST_CASE("neighbor iterator") {
 
   auto g = gl::grid(3, 3).graph;
