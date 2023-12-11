@@ -548,6 +548,11 @@ inline BitAdjmat &BitAdjmat::swap(std::size_t v1, std::size_t v2) {
   return *this;
 }
 
+inline BitAdjmat &
+BitAdjmat::swap(const std::pair<std::size_t, std::size_t> &e) {
+  return this->swap(e.first, e.second);
+}
+
 inline BitAdjmat &BitAdjmat::swap(
     const std::vector<std::pair<std::size_t, std::size_t>> &matching) {
   for (const auto &[v1, v2] : matching) {
