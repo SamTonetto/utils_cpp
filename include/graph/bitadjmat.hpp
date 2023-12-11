@@ -173,6 +173,7 @@ public:
    * @return The (i,j)th entry of the adjmat
    */
   bool get(std::size_t i, std::size_t j) const noexcept;
+  bool get(const std::pair<std::size_t, std::size_t> &e) const noexcept;
 
   /**
    * Sets both the (i,j) and (j,i) entries of the adjmat to 1.
@@ -180,6 +181,7 @@ public:
    * @param j column index
    */
   void set(std::size_t i, std::size_t j) noexcept;
+  void set(const std::pair<std::size_t, std::size_t> &e) noexcept;
 
   /**
    * Clears both the (i,j) and (j,i) entries of the adjmat.
@@ -187,6 +189,7 @@ public:
    * @param j column index
    */
   void reset(std::size_t i, std::size_t j) noexcept;
+  void reset(const std::pair<std::size_t, std::size_t> &e) noexcept;
 
   /**
    * Sets both the (i,j) and (j,i) entries of the adjmat to val
@@ -195,6 +198,7 @@ public:
    * @param val value to set
    */
   void set(std::size_t i, std::size_t j, bool val) noexcept;
+  void set(const std::pair<std::size_t, std::size_t> &e, bool val) noexcept;
 
   /**
    * Modify the adjmat inplace to reflect the swapping of two vertices in the
@@ -205,6 +209,7 @@ public:
    * @return reference to this adjmat
    */
   BitAdjmat &swap(std::size_t v1, std::size_t v2);
+  BitAdjmat &swap(const std::pair<std::size_t, std::size_t> &e);
 
   /**
    * Swap all vertices in a matching, inplace.
@@ -676,9 +681,19 @@ inline bool BitAdjmat::get(std::size_t i, std::size_t j) const noexcept {
   return (matrix(i, j / N) >> (j % N)) & 1ULL;
 }
 
+inline bool
+BitAdjmat::get(const std::pair<std::size_t, std::size_t> &e) const noexcept {
+  return get(e.first, e.second);
+}
+
 inline void BitAdjmat::set(std::size_t i, std::size_t j) noexcept {
   matrix(i, j / N) |= (1ULL << (j % N));
   matrix(j, i / N) |= (1ULL << (i % N));
+}
+
+inline void
+BitAdjmat::set(const std::pair<std::size_t, std::size_t> &e) noexcept {
+  this->set(e.first, e.second);
 }
 
 inline void BitAdjmat::reset(std::size_t i, std::size_t j) noexcept {
@@ -686,11 +701,21 @@ inline void BitAdjmat::reset(std::size_t i, std::size_t j) noexcept {
   matrix(j, i / N) &= ~(1ULL << (i % N));
 }
 
+inline void
+BitAdjmat::reset(const std::pair<std::size_t, std::size_t> &e) noexcept {
+  reset(e.first, e.second);
+}
+
 inline void BitAdjmat::set(std::size_t i, std::size_t j, bool val) noexcept {
   matrix(i, j / N) = (matrix(i, j / N) & ~(1ULL << (j % N))) |
                      (static_cast<uint64_t>(val) << (j % N));
   matrix(j, i / N) = (matrix(j, i / N) & ~(1ULL << (i % N))) |
                      (static_cast<uint64_t>(val) << (i % N));
+}
+
+inline void BitAdjmat::set(const std::pair<std::size_t, std::size_t> &e,
+                           bool val) noexcept {
+  this->set(e.first, e.second, val);
 }
 
 inline BitAdjmat operator&(const BitAdjmat &x, const BitAdjmat &y) noexcept {
