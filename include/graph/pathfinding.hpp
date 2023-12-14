@@ -361,7 +361,7 @@ astar_early_stopping(const GraphType &g, Vertex<GraphType> source,
             .distance_map(distances.data())
             .weight_map(boost::make_assoc_property_map(weight_map))
             .visitor(vis));
-  } catch (astar_goal_visitor<GraphType>::found_goal fg) {
+  } catch (typename astar_goal_visitor<GraphType>::found_goal fg) {
     // do nothing
   }
 
