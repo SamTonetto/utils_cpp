@@ -89,14 +89,35 @@ TEST_CASE("Testing rep function") {
   }
 }
 
-TEST_CASE("Testing apply function") {
-
-  std::vector<std::vector<int>> v = {{1, 2}, {3, 4}};
-
-  static_assert(utils::is_instantiation<std::vector, decltype(v)>());
+TEST_CASE("Testing fapply") {
 
   auto func = [](int x) -> int { return 2 * x; };
-  auto result = fapply(v, func);
 
-  CHECK(result == std::vector<std::vector<int>>{{2, 4}, {6, 8}});
+  SUBCASE("vector") {
+
+    std::vector<std::vector<int>> v = {{1, 2}, {3, 4}};
+
+    auto result = fapply(v, func);
+
+    CHECK(result == std::vector<std::vector<int>>{{2, 4}, {6, 8}});
+  }
+  SUBCASE("pair") {
+
+    std::pair<int, int> p = {1, 2};
+
+    auto result = fapply(p, func);
+
+    CHECK(result == std::pair<int, int>{2, 4});
+  }
+
+  SUBCASE("nested vectors and pairs") {
+    std::vector<std::pair<std::vector<int>, std::pair<int, int>>> v = {
+        {{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
+
+    auto result = fapply(v, func);
+
+    CHECK(result ==
+          std::vector<std::pair<std::vector<int>, std::pair<int, int>>>{
+              {{2, 4}, {6, 8}}, {{10, 12}, {14, 16}}});
+  }
 }

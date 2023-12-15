@@ -209,3 +209,17 @@ TEST_CASE("test print tuple") {
 
   CHECK(ss.str() == "(1, hello, [(1, a), (2, b), (3, c)])");
 }
+
+TEST_CASE("test enum") {
+
+  SUBCASE("scoped enum") {
+
+    enum class MyEnum { a, b, c };
+
+    std::stringstream ss;
+
+    ss << MyEnum::a << ' ' << MyEnum::b << ' ' << MyEnum::c;
+
+    CHECK(ss.str() == "MyEnum::a MyEnum::b MyEnum::c");
+  }
+}

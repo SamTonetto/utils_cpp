@@ -10,7 +10,7 @@ struct test_struct1 {};
 template <typename T>
 struct test_struct2 {};
 
-TEST_CASE("Testing is_same_container") {
+TEST_CASE("Testing is_instantiation") {
   SUBCASE("Same container types") {
     std::vector<int> v;
     std::unordered_map<int, std::string> m;
@@ -39,6 +39,15 @@ TEST_CASE("Testing is_same_container") {
     CHECK_FALSE(utils::is_instantiation<std::vector, test_struct1>());
     CHECK_FALSE(utils::is_instantiation<std::list, test_struct2<int>>());
     CHECK_FALSE(utils::is_instantiation<std::queue, test_struct2<int>>());
+  }
+
+  SUBCASE("pair") {
+    std::pair<int, int> p;
+    CHECK(utils::is_instantiation<std::pair, decltype(p)>());
+    CHECK(utils::is_instantiation<std::pair, std::pair<int, int>>());
+    CHECK(utils::is_instantiation<std::pair, std::pair<int, std::string>>());
+
+    CHECK_FALSE(utils::is_instantiation<std::pair, int>());
   }
 }
 

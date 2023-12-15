@@ -82,6 +82,10 @@ auto rep(const T &v, std::size_t times, std::size_t each) {
  * level of nesting. If depth is -1, the function is applied to the deepest
  * level of nesting.
  */
+template <typename U, typename V, typename Function>
+std::pair<U, V> fapply(const std::pair<U, V> &pair,
+                       Function func); // forward declaration
+
 template <typename T, typename Function>
 std::vector<T> fapply(const std::vector<T> &vec, Function func) {
 
@@ -89,10 +93,41 @@ std::vector<T> fapply(const std::vector<T> &vec, Function func) {
   for (std::size_t i = 0; i < vec.size(); ++i) {
     if constexpr (is_instantiation<std::vector, T>()) {
       result[i] = fapply<typename T::value_type, Function>(vec[i], func);
+    } else if constexpr (is_instantiation<std::pair, T>()) {
+      result[i] =
+          fapply<typename T::first_type, typename T::second_type, Function>(
+              vec[i], func);
     } else {
       result[i] = func(vec[i]);
     }
   }
+  return result;
+}
+
+template <typename U, typename V, typename Function>
+std::pair<U, V> fapply(const std::pair<U, V> &pair, Function func) {
+
+  std::pair<U, V> result;
+  if constexpr (is_instantiation<std::vector, U>()) {
+    result.first = fapply<typename U::value_type, Function>(pair.first, func);
+  } else if constexpr (is_instantiation<std::pair, U>()) {
+    result.first =
+        fapply<typename U::first_type, typename U::second_type, Function>(
+            pair.first, func);
+  } else {
+    result.first = func(pair.first);
+  }
+
+  if constexpr (is_instantiation<std::vector, V>()) {
+    result.second = fapply<typename V::value_type, Function>(pair.second, func);
+  } else if constexpr (is_instantiation<std::pair, V>()) {
+    result.second =
+        fapply<typename V::first_type, typename V::second_type, Function>(
+            pair.second, func);
+  } else {
+    result.second = func(pair.second);
+  }
+
   return result;
 }
 
