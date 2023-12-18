@@ -20,7 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "print_enum.hpp"
+#include "enum/enum_print.hpp"
 
 // ========= IO manipulation ===========
 
