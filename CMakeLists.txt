@@ -121,15 +121,15 @@ target_link_libraries(${PROJECT_NAME} INTERFACE Boost::graph)
 # ================ End Build ${PROJECT_NAME} ================
 
 
-option(BUILD_DEMOS "Build demos" FALSE)
-option(BUILD_TESTS "Build tests" FALSE)
+option(UTILS_CPP_BUILD_DEMOS "Build demos" FALSE)
+option(UTILS_CPP_BUILD_TESTS "Build tests" FALSE)
 
-if(BUILD_DEMOS)
+if(UTILS_CPP_BUILD_DEMOS)
   message(STATUS "${PROJECT_NAME} -- ${Blue}Descending into demos${ColorReset}")
   add_subdirectory(demos)
   message(STATUS "${PROJECT_NAME} -- ${Blue}Finished with demos${ColorReset}")
 endif()
-if(BUILD_TESTS)
+if(UTILS_CPP_BUILD_TESTS)
   message(STATUS "${PROJECT_NAME} -- ${Blue}Descending into tests${ColorReset}")
   add_subdirectory(tests)
   message(STATUS "${PROJECT_NAME} -- ${Blue}Finished with tests${ColorReset}")

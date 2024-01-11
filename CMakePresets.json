@@ -14,11 +14,11 @@
 	    "cacheVariables": {
 		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 		"CMAKE_CXX_FLAGS": "-fprofile-instr-generate -fcoverage-mapping -fvisibility=hidden",
-		"BUILD_TESTS": {
+		"UTILS_CPP_BUILD_TESTS": {
 		    "type": "BOOL",
 		    "value": "ON"
 		},
-		"BUILD_DEMOS": {
+		"UTILS_CPP_BUILD_DEMOS": {
 		    "type": "BOOL",
 		    "value": "ON"
 		}
@@ -32,11 +32,11 @@
 	    "cacheVariables": {
 		"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 		"CMAKE_CXX_FLAGS": "-coverage -fvisibility=hidden",
-		"BUILD_TESTS": {
+		"UTILS_CPP_BUILD_TESTS": {
 		    "type": "BOOL",
 		    "value": "ON"
 		},
-		"BUILD_DEMOS": {
+		"UTILS_CPP_BUILD_DEMOS": {
 		    "type": "BOOL",
 		    "value": "ON"
 		}
