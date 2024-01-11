@@ -12,6 +12,8 @@
 namespace utils {
 namespace gl {
 
+using utils::operator<<;
+
 struct GraphProp {
 
   std::variant<std::string, double, std::vector<double>,
@@ -105,9 +107,9 @@ struct GraphProp {
     } else if (std::holds_alternative<double>(p)) {
       os << std::get<double>(p);
     } else if (std::holds_alternative<std::vector<double>>(p)) {
-      ::operator<<(os, std::get<std::vector<double>>(p));
+      os << std::get<std::vector<double>>(p);
     } else if (std::holds_alternative<std::vector<std::vector<double>>>(p)) {
-      ::operator<<(os, std::get<std::vector<std::vector<double>>>(p));
+      os << std::get<std::vector<std::vector<double>>>(p);
     }
 
     return os;

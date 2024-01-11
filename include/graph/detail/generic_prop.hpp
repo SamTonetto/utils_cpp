@@ -117,11 +117,11 @@ std::ostream &operator<<(std::ostream &os,
                          const utils::gl::GenericProp<M, G> &gp) {
 
   if (std::holds_alternative<M<std::string, G>>(gp.p)) {
-    ::operator<<(os, std::get<M<std::string, G>>(gp.p));
+    utils::operator<<(os, std::get<M<std::string, G>>(gp.p));
   } else if (std::holds_alternative<M<double, G>>(gp.p)) {
-    ::operator<<(os, std::get<M<double, G>>(gp.p));
+    utils::operator<<(os, std::get<M<double, G>>(gp.p));
   } else {
-    ::operator<<(os, std::get<M<std::vector<double>, G>>(gp.p));
+    utils::operator<<(os, std::get<M<std::vector<double>, G>>(gp.p));
   }
   return os;
 }

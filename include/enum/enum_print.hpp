@@ -52,11 +52,11 @@ constexpr std::string_view enum_name(E e) noexcept {
   return detail::enum_fields_array_v<D>[static_cast<std::size_t>(e)];
 }
 
-} // namespace utils
-
 // In C++23, replace with std::is_scoped_enum_v
 template <typename E>
   requires(utils::scoped_enum_t<E>)
 std::ostream &operator<<(std::ostream &os, E e) {
   return os << utils::enum_name(e);
 }
+
+} // namespace utils

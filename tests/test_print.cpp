@@ -6,6 +6,8 @@
 
 #include <sstream>
 
+using utils::operator<<;
+
 TEST_CASE("print") {
   std::stringstream ss;
 

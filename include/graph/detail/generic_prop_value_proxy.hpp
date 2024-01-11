@@ -179,7 +179,8 @@ std::ostream &operator<<(std::ostream &os,
   } else if (std::holds_alternative<M<double, G>>(gp.gp.p)) {
     os << std::get<M<double, G>>(gp.gp.p).at(gp.k);
   } else if (std::holds_alternative<M<std::vector<double>, G>>(gp.gp.p)) {
-    ::operator<<(os, std::get<M<std::vector<double>, G>>(gp.gp.p).at(gp.k));
+    utils::operator<<(os,
+                      std::get<M<std::vector<double>, G>>(gp.gp.p).at(gp.k));
   }
 
   return os;
@@ -338,7 +339,8 @@ std::ostream &operator<<(std::ostream &os,
   } else if (std::holds_alternative<M<double, G>>(gp.gp.p)) {
     os << std::get<M<double, G>>(gp.gp.p).at(gp.k);
   } else if (std::holds_alternative<M<std::vector<double>, G>>(gp.gp.p)) {
-    ::operator<<(os, std::get<M<std::vector<double>, G>>(gp.gp.p).at(gp.k));
+    utils::operator<<(os,
+                      std::get<M<std::vector<double>, G>>(gp.gp.p).at(gp.k));
   }
 
   return os;

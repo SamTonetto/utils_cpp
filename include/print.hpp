@@ -120,8 +120,6 @@ std::string to_binary_string(T x) {
   return result;
 }
 
-} // namespace utils
-
 // ========= Forward Declarations ===========
 
 template <typename T>
@@ -731,3 +729,5 @@ operator<<(std::ostream &os,
 
   return os;
 }
+
+} // namespace utils
