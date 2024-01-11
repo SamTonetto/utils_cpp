@@ -21,9 +21,10 @@ namespace utils {
 namespace gl {
 
 /**
-   VecBoolAdjmat impnlementation of a binary square matrix, which should
+   VecBoolAdjmat implementation of a binary square matrix, which should
    be more efficient than using vector<vector<int>>. Stores 64 adjmat entries in
    a single uint64_t and uses bit operations to interact with its entries.
+   Prefer using bitadjmat.hpp since it is more efficient though.
  */
 class VecBoolAdjmat {
 

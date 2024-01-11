@@ -9,6 +9,8 @@
 #include <tuple>
 #include <type_traits>
 
+namespace utils {
+
 /**
  * @brief Check if tuple contains type at compile-time. Based heavily off
  * BitsOfQ's Youtube tutorials.
@@ -41,3 +43,5 @@ struct tuple_contains_type
  */
 template <typename Type>
 struct tuple_contains_type<Type, std::tuple<>, 0> : std::false_type {};
+
+}
