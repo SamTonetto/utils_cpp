@@ -413,7 +413,6 @@ to_edgelist(const Graph &g) {
 }
 
 } // namespace gl
-} // namespace utils
 
 // ---- Output ----
 
@@ -468,3 +467,5 @@ inline std::ostream &operator<<(std::ostream &os, const utils::gl::DiGraph &g) {
   }
   return os;
 }
+
+} // namespace utils
