@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include "parallel/thread_pool.hpp"
+#include "utils_cpp/parallel/thread_pool.hpp"
 
 using namespace utils;
 

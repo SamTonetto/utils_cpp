@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "graph/graph.hpp"
+#include "utils_cpp/graph/graph.hpp"
 
 #include <bit>
 #include <unordered_set>

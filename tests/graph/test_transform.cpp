@@ -1,12 +1,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/library.hpp"
-#include "graph/transforms.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/transforms.hpp"
 
 using namespace utils;
 
-#include "graph/graphviz.hpp"
+#include "utils_cpp/graph/graphviz.hpp"
+
 TEST_CASE("test remove") {
 
   auto gb = gl::grid(3, 3);

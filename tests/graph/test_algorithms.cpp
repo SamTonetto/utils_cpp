@@ -1,8 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/algorithms.hpp"
-#include "graph/library.hpp"
+#include "utils_cpp/graph/algorithms.hpp"
+#include "utils_cpp/graph/library.hpp"
 
 #include <boost/graph/graphviz.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>

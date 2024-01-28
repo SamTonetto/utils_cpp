@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "graph/detail/generic_prop_value_proxy.hpp"
+#include "utils_cpp/graph/detail/generic_prop_value_proxy.hpp"
 
-#include "metaprogramming/custom_concepts.hpp"
+#include "utils_cpp/metaprogramming/custom_concepts.hpp"
 
-#include "print.hpp"
+#include "utils_cpp/print.hpp"
 
 namespace utils {
 namespace gl {

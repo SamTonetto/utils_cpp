@@ -5,10 +5,10 @@
 #include <sstream>
 #include <string>
 
-#include "print.hpp"
+#include "utils_cpp/print.hpp"
 
-#include "graph/graphviz.hpp"
-#include "graph/library.hpp"
+#include "utils_cpp/graph/graphviz.hpp"
+#include "utils_cpp/graph/library.hpp"
 
 using namespace utils;
 

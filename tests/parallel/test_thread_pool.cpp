@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "parallel/thread_pool.hpp"
+#include "utils_cpp/parallel/thread_pool.hpp"
 
 using namespace utils;
 

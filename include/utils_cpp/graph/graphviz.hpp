@@ -6,10 +6,10 @@
  * @date 2023
  ***********************************************************************/
 
-#include "graph/graph.hpp"
-#include "graph/properties.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/properties.hpp"
 
-#include "print.hpp"
+#include "utils_cpp/print.hpp"
 
 #include <fstream>
 #include <unordered_map>

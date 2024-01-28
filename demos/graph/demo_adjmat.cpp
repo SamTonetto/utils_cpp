@@ -1,6 +1,6 @@
-#include "graph/bitadjmat.hpp"
-#include "graph/conversions.hpp"
-#include "graph/library.hpp"
+#include "utils_cpp/graph/bitadjmat.hpp"
+#include "utils_cpp/graph/conversions.hpp"
+#include "utils_cpp/graph/library.hpp"
 
 #include <iostream>
 

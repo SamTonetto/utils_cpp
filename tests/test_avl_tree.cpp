@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "avl_tree.hpp"
+#include "utils_cpp/avl_tree.hpp"
 
 TEST_CASE("Testing AVLTree functionality") {
   utils::AVLTree<int> tree;

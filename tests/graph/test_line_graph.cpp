@@ -1,9 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/graphviz.hpp"
-#include "graph/library.hpp"
-#include "graph/line_graph.hpp"
+#include "utils_cpp/graph/graphviz.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/line_graph.hpp"
 
 using namespace utils;
 

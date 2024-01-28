@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "print.hpp"
-#include "string.hpp"
+#include "utils_cpp/print.hpp"
+#include "utils_cpp/string.hpp"
 
 TEST_CASE("split") {
   CHECK(utils::split("Hello,World", ",") ==

@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "parallel/function_wrapper.hpp"
-#include "parallel/threadsafe_queue.hpp"
+#include "utils_cpp/parallel/function_wrapper.hpp"
+#include "utils_cpp/parallel/threadsafe_queue.hpp"
 
 #include <future>
 #include <vector>

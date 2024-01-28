@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "graph/graph.hpp"
-#include "graph/properties.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/properties.hpp"
 
 #include <random>
 #include <string>

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "graph/detail/generic_prop.hpp"
-#include "graph/detail/generic_prop_map.hpp"
-#include "graph/detail/generic_prop_value_proxy.hpp"
+#include "utils_cpp/graph/detail/generic_prop.hpp"
+#include "utils_cpp/graph/detail/generic_prop_map.hpp"
+#include "utils_cpp/graph/detail/generic_prop_value_proxy.hpp"
 
-#include "graph/detail/graph_prop.hpp"
-#include "graph/graph.hpp"
-#include "metaprogramming/is_instantiation.hpp"
+#include "utils_cpp/graph/detail/graph_prop.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/metaprogramming/is_instantiation.hpp"
 
 #include <iostream>
 #include <memory>
 #include <typeinfo>
 
-#include "print.hpp"
+#include "utils_cpp/print.hpp"
 
 namespace utils {
 namespace gl {

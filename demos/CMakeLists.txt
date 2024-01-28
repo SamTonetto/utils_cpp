@@ -3,7 +3,7 @@ message(STATUS "${PROJECT_NAME} -- Configuring Demos")
 foreach(example ${DEMOS})
   get_filename_component(exec_name ${example} NAME_WE)
   add_executable(${exec_name} ${example} ${SOURCES})
-  target_link_libraries(${exec_name} ${PROJECT_NAME})
+  target_link_libraries(${exec_name} PRIVATE ${PROJECT_NAME})
   message(STATUS "demos --   ${exec_name}... ${Green}OK${ColorReset}")
 endforeach()
 

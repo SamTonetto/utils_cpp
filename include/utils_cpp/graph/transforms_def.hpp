@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graph/graph.hpp"
-#include "graph/properties.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/properties.hpp"
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/copy.hpp>

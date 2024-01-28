@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "matrix.hpp"
+#include "utils_cpp/matrix.hpp"
 
 using namespace utils;
 

@@ -1,8 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/library.hpp"
-#include "graph/vecbooladjmat.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/vecbooladjmat.hpp"
 
 #include <iostream>
 #include <sstream>

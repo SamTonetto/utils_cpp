@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "metaprogramming/is_instantiation.hpp"
+#include "utils_cpp/metaprogramming/is_instantiation.hpp"
 
 #include <bitset>
 #include <forward_list>

@@ -1,9 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/graph.hpp"
-#include "graph/library.hpp"
-#include "graph/pathfinding.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/pathfinding.hpp"
 
 #include <iostream>
 #include <random>

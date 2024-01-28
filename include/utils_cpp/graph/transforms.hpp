@@ -8,16 +8,16 @@
 
 #pragma once
 
-#include "graph/graph.hpp"
-#include "graph/properties.hpp"
-#include "graph/transforms_def.hpp"
-#include "random.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/properties.hpp"
+#include "utils_cpp/graph/transforms_def.hpp"
+#include "utils_cpp/random.hpp"
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/copy.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>
 
-#include "print.hpp"
+#include "utils_cpp/print.hpp"
 
 namespace utils {
 namespace gl {

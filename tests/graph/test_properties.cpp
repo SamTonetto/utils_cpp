@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "graph/properties.hpp"
+#include "utils_cpp/graph/properties.hpp"
 
 /*
  * For some reason, Doctest's CHECK does not like operator== for PropMaps, so

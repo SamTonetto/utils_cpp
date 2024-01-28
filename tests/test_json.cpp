@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "json.hpp"
+#include "utils_cpp/json.hpp"
 
 #include <iostream>
 #include <map>

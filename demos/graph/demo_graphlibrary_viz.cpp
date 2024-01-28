@@ -1,6 +1,6 @@
-#include "graph/graph.hpp"
-#include "graph/library.hpp"
-#include "graph/properties.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/properties.hpp"
 
 #include <boost/graph/graphviz.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>

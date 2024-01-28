@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "parallel/threadsafe_queue.hpp"
+#include "utils_cpp/parallel/threadsafe_queue.hpp"
 
 using namespace utils;
 

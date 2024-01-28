@@ -8,9 +8,9 @@
 
 #pragma once
 
-#include "matrix.hpp"
+#include "utils_cpp/matrix.hpp"
 
-#include "graph/graph.hpp"
+#include "utils_cpp/graph/graph.hpp"
 
 #include <array>
 #include <bit>

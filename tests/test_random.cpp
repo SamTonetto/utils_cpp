@@ -1,8 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "print.hpp"
-#include "random.hpp"
+#include "utils_cpp/print.hpp"
+#include "utils_cpp/random.hpp"
 
 #include <iostream>
 

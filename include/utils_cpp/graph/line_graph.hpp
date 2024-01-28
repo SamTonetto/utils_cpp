@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "graph.hpp"
-#include "print.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/print.hpp"
 
 namespace utils {
 

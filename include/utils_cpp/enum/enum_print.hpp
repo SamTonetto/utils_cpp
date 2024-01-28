@@ -12,7 +12,7 @@
 #include <source_location>
 #include <string_view>
 
-#include "enum/enum_basics.hpp"
+#include "utils_cpp/enum/enum_basics.hpp"
 
 namespace utils {
 

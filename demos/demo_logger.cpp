@@ -1,5 +1,4 @@
-#include "logger.hpp"
-
+#include "utils_cpp/logger.hpp"
 
 ENABLE_LOG_GROUP(foo)
 
@@ -23,10 +22,8 @@ void bar() {
 }
 // -----------------------
 
-
 int main() {
 
   foo(); // logged
   bar(); // not logged
-
 }

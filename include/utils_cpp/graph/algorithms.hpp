@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "graph/bitadjmat.hpp"
-#include "graph/graph.hpp"
+#include "utils_cpp/graph/bitadjmat.hpp"
+#include "utils_cpp/graph/graph.hpp"
 
 namespace utils {
 namespace gl {

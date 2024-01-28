@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "interval_tree.hpp"
+#include "utils_cpp/interval_tree.hpp"
 
 TEST_CASE("test insert") {
 

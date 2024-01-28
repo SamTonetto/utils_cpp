@@ -1,9 +1,9 @@
 #include <iostream>
 #include <random>
 
-#include "graph/graph.hpp"
-#include "graph/library.hpp"
-#include "graph/pathfinding.hpp"
+#include "utils_cpp/graph/graph.hpp"
+#include "utils_cpp/graph/library.hpp"
+#include "utils_cpp/graph/pathfinding.hpp"
 
 using namespace utils;
 

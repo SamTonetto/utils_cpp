@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "bitvector.hpp"
+#include "utils_cpp/bitvector.hpp"
 
 TEST_CASE("create, set and iterate through bitvector") {
 

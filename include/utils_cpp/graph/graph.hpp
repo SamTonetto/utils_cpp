@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "hash.hpp"
+#include "utils_cpp/hash.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>

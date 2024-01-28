@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest/doctest.h"
 
-#include "indexing.hpp"
+#include "utils_cpp/indexing.hpp"
 
 using namespace utils;
 

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "graph/graph.hpp"
+#include "utils_cpp/graph/graph.hpp"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/adjacency_matrix.hpp>
